@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation(libs.firebase.auth)
 
 
     // Testing
