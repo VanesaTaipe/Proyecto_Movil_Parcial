@@ -38,6 +38,8 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.tooling.preview.Preview
 
 class SignInActivity : ComponentActivity() {
 
@@ -113,50 +115,92 @@ class SignInActivity : ComponentActivity() {
 
 @Composable
 fun SignInScreen(onSignInClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        // Este es el equivalente al LinearLayout con borde en el XML
-        Row(
-            modifier = Modifier
-                .border(
-                    width = 2.dp,
-                    color = Color(0xFF459DE4), // Color azul definido en colors.xml
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .clip(RoundedCornerShape(4.dp)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Icono de Google
-            Image(
-                painter = painterResource(id = R.drawable.google),
-                contentDescription = "Google Icon",
-                modifier = Modifier
-                    .background(Color.White)
-                    .padding(11.dp)
-                    .size(28.dp)
-            )
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top) {
+        Text(
+            text = "AiWordFlow",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        Text(
+            text = "Iniciar Sesión",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.Start)
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Correo",
+            fontSize = 16.sp,
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.Start)
+        )
 
-            // Botón de inicio de sesión
-            Button(
-                onClick = onSignInClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF459DE4) // Color azul definido en colors.xml
-                ),
+        Text("Contraseña")
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // Este es el equivalente al LinearLayout con borde en el XML
+            Row(
                 modifier = Modifier
-                    .height(50.dp)
-                    .width(200.dp)
+                    .border(
+                        width = 2.dp,
+                        color = Color(0xFF459DE4), // Color azul definido en colors.xml
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .clip(RoundedCornerShape(4.dp)),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Sign up with Google",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal
+                // Icono de Google
+                Image(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google Icon",
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(11.dp)
+                        .size(28.dp)
                 )
+
+                // Botón de inicio de sesión
+                Button(
+                    onClick = onSignInClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF459DE4)
+                    ),
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(200.dp)
+                ) {
+                    Text(
+                        text = "Sign up with Google",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
             }
         }
+    }
+
+}
+@Preview(
+    showBackground = true,
+    name = "Sign In Screen Preview",
+    widthDp = 360,
+    heightDp = 640
+)
+@Composable
+fun SignInScreenPreview() {
+    MaterialTheme {
+        SignInScreen(onSignInClick = {})
     }
 }
