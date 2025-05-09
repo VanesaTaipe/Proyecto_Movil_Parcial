@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +31,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlin.coroutines.coroutineContext
 
 class MainActivity : ComponentActivity() {
 
@@ -60,7 +64,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(
-                        userName = if (user != null) "Welcome, $userName" else "Loading..",
+                        userName = if (user != null) "Hola, $userName" else "Loading..",
                         onLogoutClick = { signOutAndStartSignInActivity() }
                     )
                 }
@@ -87,14 +91,25 @@ fun MainScreen(userName: String, onLogoutClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
             text = userName,
             fontSize = 30.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        Text("Tus palabras en frase")
 
         Spacer(modifier = Modifier.height(132.dp))
 
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .background(Color.LightGray)
+        ){
+            Text("Aún no tienes palabras nuevas buscadas")
+        }
+
+        Spacer(modifier = Modifier.height(132.dp))
         Button(
             onClick = onLogoutClick,
             colors = ButtonDefaults.buttonColors(
@@ -107,6 +122,7 @@ fun MainScreen(userName: String, onLogoutClick: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
         }
+
     }
 }
 @Preview(

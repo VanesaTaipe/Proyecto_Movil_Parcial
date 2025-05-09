@@ -1,5 +1,4 @@
 package com.example.proyecto_movil_parcial
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -25,13 +24,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -158,7 +155,6 @@ fun AiWordFlowLoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF474C7A))
         )
 
         // Contenido principal con fondo blanco
@@ -214,7 +210,7 @@ fun AiWordFlowLoginScreen(
                 placeholder = { Text("Ingresa tu correo") },
                 leadingIcon = {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.usuario),
                         contentDescription = "Email Icon",
                         modifier = Modifier.size(24.dp)
                     )
@@ -246,7 +242,7 @@ fun AiWordFlowLoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 leadingIcon = {
                     Image(
-                        painter = painterResource(id = R.drawable.google),
+                        painter = painterResource(id = R.drawable.contrasena),
                         contentDescription = "Password Icon",
                         modifier = Modifier.size(24.dp)
                     )
