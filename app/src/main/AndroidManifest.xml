@@ -13,17 +13,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_Movil_parcial"
         tools:targetApi="31">
+
         <activity
-            android:name="com.example.proyecto_movil_parcial.MainActivity"
-            android:exported="true" />
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Proyecto_Movil_parcial" />
+
         <activity
-            android:name="com.example.proyecto_movil_parcial.SignInActivity"
-            android:exported="true">
+            android:name=".PresentationActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Proyecto_Movil_parcial" />
+
+        <activity
+            android:name=".SignInActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Proyecto_Movil_parcial">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
