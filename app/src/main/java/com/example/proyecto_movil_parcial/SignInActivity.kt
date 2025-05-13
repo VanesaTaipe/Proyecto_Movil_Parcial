@@ -1,4 +1,5 @@
 package com.example.proyecto_movil_parcial
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -7,41 +8,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,21 +67,8 @@ class SignInActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AiWordFlowLoginScreen(
-                        onLoginClick = { email, password ->
-                            // Aquí iría la lógica de inicio de sesión con email/password
-                            Toast.makeText(this, "Login con email: $email", Toast.LENGTH_SHORT).show()
-                        },
-                        onGoogleLoginClick = { signIn() },
-                        onFacebookLoginClick = {
-                            Toast.makeText(this, "Login con Facebook", Toast.LENGTH_SHORT).show()
-                        },
-                        onForgotPasswordClick = {
-                            Toast.makeText(this, "Recuperar contraseña", Toast.LENGTH_SHORT).show()
-                        },
-                        onRegisterClick = {
-                            Toast.makeText(this, "Registrarse", Toast.LENGTH_SHORT).show()
-                        }
+                    SimpleGoogleLoginScreen(
+                        onGoogleLoginClick = { signIn() }
                     )
                 }
             }
@@ -128,224 +92,82 @@ class SignInActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    Toast.makeText(this, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error de autenticación", Toast.LENGTH_SHORT).show()
                 }
             }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiWordFlowLoginScreen(
-    onLoginClick: (email: String, password: String) -> Unit,
-    onGoogleLoginClick: () -> Unit,
-    onFacebookLoginClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit,
-    onRegisterClick: () -> Unit
+fun SimpleGoogleLoginScreen(
+    onGoogleLoginClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Barra lateral púrpura
-        Box(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        // Imagen que ocupa toda la parte superior (70% de la pantalla)
+        Image(
+            painter = painterResource(id = R.drawable.imagelogin),
+            contentDescription = "Login illustration",
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(0.7f),
+            contentScale = ContentScale.Crop
         )
 
-        // Contenido principal con fondo blanco
+        // Contenido en la parte inferior (30% de la pantalla)
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(vertical = 16.dp)
-                .clip(RoundedCornerShape(0.dp))
+                .fillMaxWidth()
+                .weight(0.3f)
                 .background(Color.White)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 32.dp)
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Título "AiWordFlow"
+            // Título de la app
             Text(
                 text = "AiWordFlow",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            // Texto "Iniciar Sesión"
-            Text(
-                text = "Iniciar Sesión",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Campo de Correo
+            // Descripción
             Text(
-                text = "Correo",
-                fontSize = 16.sp,
-                color = Color.Black,
-                modifier = Modifier.align(Alignment.Start)
+                text = "Crea tu diccionario personal,\naprende con IA y mejora tu\nvocabulario creando oraciones",
+                fontSize = 20.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                placeholder = { Text("Ingresa tu correo") },
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.usuario),
-                        contentDescription = "Email Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                shape = RoundedCornerShape(4.dp),
-                singleLine = true
+            // Botón de Google Sign In
+            GoogleSignInButton(
+                onClick = onGoogleLoginClick
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo de Contraseña
-            Text(
-                text = "Contraseña",
-                fontSize = 16.sp,
-                color = Color.Black,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                placeholder = { Text("Ingresa tu contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.contrasena),
-                        contentDescription = "Password Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                shape = RoundedCornerShape(4.dp),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // ¿Olvidaste tu contraseña?
-            TextButton(
-                onClick = onForgotPasswordClick,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(
-                    text = "¿Olvidaste tu contraseña?",
-                    color = Color.Black,
-                    fontSize = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Botón Ingresar
-            Button(
-                onClick = { onLoginClick(email, password) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFBB6BB0)
-                )
-            ) {
-                Text(
-                    text = "Ingresar",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ¿No tienes cuenta? Regístrate
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "¿No tienes cuenta?",
-                    color = Color.Black,
-                    fontSize = 14.sp
-                )
-                TextButton(onClick = onRegisterClick) {
-                    Text(
-                        text = "Regístrate",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Botones de inicio de sesión con redes sociales
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp)
-            ) {
-                // Botón Gmail
-                SocialLoginButton(
-                    iconRes = R.drawable.google,
-                    onClick = onGoogleLoginClick
-                )
-
-                Spacer(modifier = Modifier.width(40.dp))
-
-                // Botón Facebook
-                SocialLoginButton(
-                    iconRes = R.drawable.facebook,
-                    onClick = onFacebookLoginClick
-                )
-            }
         }
     }
 }
 
 @Composable
-fun SocialLoginButton(
-    iconRes: Int,
+fun GoogleSignInButton(
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier.size(56.dp),
-        shape = CircleShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.White
         ),
@@ -353,11 +175,26 @@ fun SocialLoginButton(
             defaultElevation = 2.dp
         )
     ) {
-        Image(
-            painter = painterResource(id = iconRes),
-            contentDescription = "Social Login",
-            modifier = Modifier.size(32.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // Icono de Google
+            Image(
+                painter = painterResource(id = R.drawable.google),
+                contentDescription = "Google Logo",
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "Iniciar sesión con Google",
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
@@ -367,14 +204,10 @@ fun SocialLoginButton(
     heightDp = 640
 )
 @Composable
-fun AiWordFlowLoginPreview() {
+fun SimpleGoogleLoginPreview() {
     MaterialTheme {
-        AiWordFlowLoginScreen(
-            onLoginClick = { _, _ -> },
-            onGoogleLoginClick = { },
-            onFacebookLoginClick = { },
-            onForgotPasswordClick = { },
-            onRegisterClick = { }
+        SimpleGoogleLoginScreen(
+            onGoogleLoginClick = { }
         )
     }
 }
