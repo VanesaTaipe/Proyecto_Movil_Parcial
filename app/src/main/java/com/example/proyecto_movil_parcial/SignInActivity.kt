@@ -54,8 +54,8 @@ class SignInActivity : ComponentActivity() {
         // Verificar si el usuario ya está autenticado
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            // El usuario ya está conectado, navegar a MainActivity
-            startActivity(Intent(this, MainActivity::class.java))
+            // El usuario ya está conectado, ir a LoadingActivity para verificar estado
+            startActivity(Intent(this, LoadingActivity::class.java))
             finish()
             return
         }
@@ -93,7 +93,8 @@ class SignInActivity : ComponentActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     Toast.makeText(this, "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+                    // Ir a LoadingActivity para verificar estado del usuario
+                    startActivity(Intent(this, LoadingActivity::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, "Error de autenticación", Toast.LENGTH_SHORT).show()

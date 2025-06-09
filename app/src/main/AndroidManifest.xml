@@ -14,16 +14,25 @@
         android:theme="@style/Theme.Proyecto_Movil_parcial"
         tools:targetApi="31">
 
+        <!-- MainActivity: Pantalla principal de la app -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Proyecto_Movil_parcial" />
 
+        <!-- LoadingActivity: Nueva actividad para verificar estado del usuario -->
+        <activity
+            android:name=".LoadingActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Proyecto_Movil_parcial" />
+
+        <!-- PresentationActivity: Onboarding para configurar palabras por día -->
         <activity
             android:name=".PresentationActivity"
             android:exported="true"
             android:theme="@style/Theme.Proyecto_Movil_parcial" />
 
+        <!-- SignInActivity: Pantalla de login, punto de entrada de la app -->
         <activity
             android:name=".SignInActivity"
             android:exported="true"

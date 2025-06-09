@@ -2,6 +2,7 @@ package com.example.proyecto_movil_parcial
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -23,7 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,10 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HeaderSection
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class PresentationActivity : ComponentActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicializar Firebase
+        auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
 
         setContent {
             MaterialTheme {
@@ -46,27 +56,65 @@ class PresentationActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     PresentationScreen(
-                        onFinish = {
-                            // Navegar a MainActivity cuando termine la presentación
-                            val intent = Intent(this@PresentationActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                        onFinish = { maxPalabras ->
+                            saveMaxPalabrasAndNavigate(maxPalabras)
                         }
                     )
                 }
             }
         }
     }
+
+    private fun saveMaxPalabrasAndNavigate(maxPalabras: Int) {
+        val currentUser = auth.currentUser
+
+        if (currentUser == null) {
+            Toast.makeText(this, "Error: Usuario no encontrado", Toast.LENGTH_SHORT).show()
+            redirectToLogin()
+            return
+        }
+
+        // Actualizar el documento del usuario con maxPalabrasDia
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .update(
+                mapOf(
+                    "maxPalabrasDia" to maxPalabras,
+                    "ultimoAcceso" to com.google.firebase.Timestamp.now()
+                )
+            )
+            .addOnSuccessListener {
+                // Navegar a MainActivity
+                val intent = Intent(this@PresentationActivity, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "Error al guardar configuración: ${exception.message}",
+                    Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun redirectToLogin() {
+        val intent = Intent(this, SignInActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
 }
 
 @Composable
-fun PresentationScreen(onFinish: () -> Unit) {
+fun PresentationScreen(onFinish: (Int) -> Unit) {
     FirstPresentationScreen(onNext = onFinish)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FirstPresentationScreen(onNext: () -> Unit) {
+fun FirstPresentationScreen(onNext: (Int) -> Unit) {
+    var palabrasText by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -108,15 +156,21 @@ fun FirstPresentationScreen(onNext: () -> Unit) {
 
             // Campo de entrada para el número de palabras
             OutlinedTextField(
-                value = "",
-                onValueChange = { },
+                value = palabrasText,
+                onValueChange = { newValue ->
+                    // Solo permitir números
+                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                        palabrasText = newValue
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 48.dp),
                 placeholder = { Text("Escribe un número") },
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -127,17 +181,31 @@ fun FirstPresentationScreen(onNext: () -> Unit) {
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(
-                    onClick = onNext,
+                    onClick = {
+                        val maxPalabras = palabrasText.toIntOrNull()
+                        if (maxPalabras != null && maxPalabras > 0) {
+                            isLoading = true
+                            onNext(maxPalabras)
+                        }
+                    },
                     modifier = Modifier.width(120.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFCEA3D9)  // Color morado claro
                     ),
-                    shape = RoundedCornerShape(24.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    enabled = !isLoading && palabrasText.isNotEmpty() && palabrasText.toIntOrNull() != null && palabrasText.toInt() > 0
                 ) {
-                    Text(
-                        text = "Siguiente",
-                        color = Color.White
-                    )
+                    if (isLoading) {
+                        Text(
+                            text = "...",
+                            color = Color.White
+                        )
+                    } else {
+                        Text(
+                            text = "Siguiente",
+                            color = Color.Black
+                        )
+                    }
                 }
             }
         }
