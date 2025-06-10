@@ -4,27 +4,21 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.proyecto_movil_parcial.Screens.DesScreen
+import com.example.proyecto_movil_parcial.Screens.DicScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -32,6 +26,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
+import com.example.proyecto_movil_parcial.navigation.Screen
+import com.example.proyecto_movil_parcial.Screens.InicioScreen
+import com.example.proyecto_movil_parcial.Screens.PerfScreen
+
+
 
 class MainActivity : ComponentActivity() {
 
@@ -65,9 +65,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen(
+                    MainNavigationScreen(
                         userName = if (user != null) "Hola, $userName" else "Loading..",
-                        onLogoutClick = { signOutAndStartSignInActivity() }
+                        onSignOut = { signOutAndStartSignInActivity() }
                     )
                 }
             }
@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
-            // Optional: Update UI or show a message to the user
             val intent = Intent(this@MainActivity, SignInActivity::class.java)
             startActivity(intent)
             finish()
@@ -87,86 +86,46 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(userName: String, onLogoutClick: () -> Unit) {
-    var maxPalabras by remember { mutableStateOf<Int?>(null) }
+fun MainNavigationScreen(
+    userName: String,
+    onSignOut: () -> Unit
+) {
+    val navController = rememberNavController()
+    val currentRoute by navController.currentBackStackEntryAsState()
 
-    // Cargar maxPalabrasDia desde Firestore
-    LaunchedEffect(Unit) {
-        val auth = FirebaseAuth.getInstance()
-        val firestore = FirebaseFirestore.getInstance()
-        val currentUser = auth.currentUser
-
-        if (currentUser != null) {
-            firestore.collection("users")
-                .document(currentUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        maxPalabras = document.getLong("maxPalabrasDia")?.toInt()
-                    }
-                }
-        }
-    }
-
-    Column(
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            text = userName,
-            fontSize = 30.sp,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        // Mostrar max palabras si está disponible
-        maxPalabras?.let { max ->
-            Text(
-                text = "Max palabras: $max",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
+        bottomBar = {
+            BottomNavigationBar(navController)
         }
-
-        Text("Tus palabras en frase")
-
-        Spacer(modifier = Modifier.height(132.dp))
-
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .background(Color.LightGray)
-        ){
-            Text("Aún no tienes palabras nuevas buscadas")
-        }
-
-        Spacer(modifier = Modifier.height(132.dp))
-        Button(
-            onClick = onLogoutClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red
-            )
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Inico.rout,
+            modifier = Modifier.padding(innerPadding)
         ) {
-            Text(
-                text = "logout",
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
+            composable(route = Screen.Inico.rout) {
+                InicioScreen()
+            }
+            composable(route = Screen.Diccionario.rout) {
+                DicScreen()
+            }
+            composable(route = Screen.Desafíos.rout) {
+                DesScreen()
+            }
+            composable(route = Screen.Perfil.rout) {
+                PerfScreen(
+                        userName = userName,
+                        onSignOut = onSignOut
+                )
+            }
         }
-
     }
 }
-@Preview(
-    showBackground = true,
-    name = "Main Screen Preview"
-)
+@Preview
 @Composable
-fun MainScreenPreview() {
+fun prueba(){
     MaterialTheme {
-        MainScreen(
-            userName = "Welcome, John Doe",
-            onLogoutClick = {}  // En la vista previa, no necesitamos una acción real
-        )
+        MainNavigationScreen("VANESA") { }
     }
 }

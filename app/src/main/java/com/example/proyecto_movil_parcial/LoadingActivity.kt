@@ -65,21 +65,37 @@ class LoadingActivity : ComponentActivity() {
             .addOnSuccessListener { document ->
                 try {
                     if (document.exists()) {
-                        // Usuario existe, verificar si tiene maxPalabrasDia
+                        // Usuario existe, verificar si es primera vez o usuario recurrente
                         val maxPalabrasDia = document.getLong("maxPalabrasDia")
+                        val fechaRegistro = document.getTimestamp("fechaRegistro")
+                        val isFirstTime = intent.getBooleanExtra("isFirstTime", false)
 
-                        if (maxPalabrasDia != null && maxPalabrasDia > 0) {
-                            // Usuario completo -> MainActivity
-                            redirectToMain()
-                        } else {
-                            // Usuario incompleto -> PresentationActivity
-                            redirectToPresentation()
+                        android.util.Log.d("LoadingActivity", "maxPalabrasDia: $maxPalabrasDia")
+                        android.util.Log.d("LoadingActivity", "fechaRegistro: $fechaRegistro")
+                        android.util.Log.d("LoadingActivity", "isFirstTime: $isFirstTime")
+
+                        when {
+                            // Si tiene maxPalabrasDia configurado, es usuario completo
+                            maxPalabrasDia != null && maxPalabrasDia > 0 -> {
+                                // Actualizar último acceso y ir a MainActivity
+                                updateLastAccessAndRedirectToMain(userId)
+                            }
+                            // Si no tiene maxPalabrasDia pero tiene fechaRegistro, necesita completar configuración
+                            fechaRegistro != null -> {
+                                redirectToPresentation()
+                            }
+                            // Caso extraño: documento existe pero sin datos básicos
+                            else -> {
+                                android.util.Log.w("LoadingActivity", "Usuario existe pero sin datos básicos")
+                                recreateUserAndRedirectToPresentation(currentUser)
+                            }
                         }
                     } else {
                         // Usuario no existe -> Crear y ir a PresentationActivity
                         createUserAndRedirectToPresentation(currentUser)
                     }
                 } catch (e: Exception) {
+                    android.util.Log.e("LoadingActivity", "Error procesando datos: ${e.message}", e)
                     Toast.makeText(this, "Error procesando datos: ${e.message}",
                         Toast.LENGTH_SHORT).show()
                     redirectToLogin()
@@ -87,6 +103,7 @@ class LoadingActivity : ComponentActivity() {
             }
             .addOnFailureListener { exception ->
                 // Error al consultar Firestore
+                android.util.Log.e("LoadingActivity", "Error de conexión: ${exception.message}", exception)
                 Toast.makeText(this, "Error de conexión: ${exception.message}",
                     Toast.LENGTH_LONG).show()
 
@@ -97,28 +114,73 @@ class LoadingActivity : ComponentActivity() {
             }
     }
 
+    private fun updateLastAccessAndRedirectToMain(userId: String) {
+        firestore.collection("users")
+            .document(userId)
+            .update("ultimoAcceso", com.google.firebase.Timestamp.now())
+            .addOnSuccessListener {
+                redirectToMain()
+            }
+            .addOnFailureListener { exception ->
+                android.util.Log.w("LoadingActivity", "Error actualizando último acceso: ${exception.message}")
+                // Aunque falle la actualización, igual redirigir a Main
+                redirectToMain()
+            }
+    }
+
     private fun createUserAndRedirectToPresentation(user: com.google.firebase.auth.FirebaseUser) {
         val userData = hashMapOf(
             "email" to user.email,
             "displayName" to user.displayName,
             "fechaRegistro" to com.google.firebase.Timestamp.now(),
-            "ultimoAcceso" to com.google.firebase.Timestamp.now()
+            "ultimoAcceso" to com.google.firebase.Timestamp.now(),
+            "isNewUser" to true
         )
+
+        android.util.Log.d("LoadingActivity", "Creando nuevo usuario")
 
         firestore.collection("users")
             .document(user.uid)
             .set(userData)
             .addOnSuccessListener {
+                android.util.Log.d("LoadingActivity", "Usuario creado exitosamente")
                 redirectToPresentation()
             }
             .addOnFailureListener { exception ->
+                android.util.Log.e("LoadingActivity", "Error al crear usuario: ${exception.message}", exception)
                 Toast.makeText(this, "Error al crear usuario: ${exception.message}",
                     Toast.LENGTH_SHORT).show()
                 redirectToLogin()
             }
     }
 
+    private fun recreateUserAndRedirectToPresentation(user: com.google.firebase.auth.FirebaseUser) {
+        val userData = hashMapOf(
+            "email" to user.email,
+            "displayName" to user.displayName,
+            "fechaRegistro" to com.google.firebase.Timestamp.now(),
+            "ultimoAcceso" to com.google.firebase.Timestamp.now(),
+            "isRecreated" to true
+        )
+
+        android.util.Log.d("LoadingActivity", "Recreando datos de usuario")
+
+        firestore.collection("users")
+            .document(user.uid)
+            .update(userData as Map<String, Any>)
+            .addOnSuccessListener {
+                redirectToPresentation()
+            }
+            .addOnFailureListener { exception ->
+                android.util.Log.e("LoadingActivity", "Error recreando usuario: ${exception.message}", exception)
+                Toast.makeText(this, "Error actualizando datos: ${exception.message}",
+                    Toast.LENGTH_SHORT).show()
+                redirectToLogin()
+            }
+    }
+
     private fun redirectToLogin() {
+        android.util.Log.d("LoadingActivity", "Redirigiendo a login")
         val intent = Intent(this, SignInActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -126,6 +188,7 @@ class LoadingActivity : ComponentActivity() {
     }
 
     private fun redirectToPresentation() {
+        android.util.Log.d("LoadingActivity", "Redirigiendo a presentación")
         val intent = Intent(this, PresentationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -133,6 +196,7 @@ class LoadingActivity : ComponentActivity() {
     }
 
     private fun redirectToMain() {
+        android.util.Log.d("LoadingActivity", "Redirigiendo a main")
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

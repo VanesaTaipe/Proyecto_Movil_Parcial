@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.googleid)
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.firebase.auth)
+    //BottonNavigate
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
 
 
     // Testing

@@ -41,6 +41,7 @@ class SignInActivity : ComponentActivity() {
             val account = task.getResult(ApiException::class.java)
             account.idToken?.let { firebaseAuthWithGoogle(it) }
         } catch (e: ApiException) {
+            android.util.Log.e("SignInActivity", "Google sign in failed: ${e.message}", e)
             Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -54,6 +55,7 @@ class SignInActivity : ComponentActivity() {
         // Verificar si el usuario ya está autenticado
         val currentUser = auth.currentUser
         if (currentUser != null) {
+            android.util.Log.d("SignInActivity", "Usuario ya autenticado, redirigiendo a LoadingActivity")
             // El usuario ya está conectado, ir a LoadingActivity para verificar estado
             startActivity(Intent(this, LoadingActivity::class.java))
             finish()
@@ -82,8 +84,12 @@ class SignInActivity : ComponentActivity() {
             .build()
 
         val googleSignInClient = GoogleSignIn.getClient(this, gso)
-        val signInIntent = googleSignInClient.signInIntent
-        signInLauncher.launch(signInIntent)
+
+        // Cerrar sesión primero para asegurar selección de cuenta
+        googleSignInClient.signOut().addOnCompleteListener {
+            val signInIntent = googleSignInClient.signInIntent
+            signInLauncher.launch(signInIntent)
+        }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
@@ -92,11 +98,20 @@ class SignInActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
+                    val isNewUser = task.result?.additionalUserInfo?.isNewUser ?: false
+
+                    android.util.Log.d("SignInActivity", "Auth exitoso - Usuario: ${user?.displayName}")
+                    android.util.Log.d("SignInActivity", "Es nuevo usuario: $isNewUser")
+
                     Toast.makeText(this, "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
-                    // Ir a LoadingActivity para verificar estado del usuario
-                    startActivity(Intent(this, LoadingActivity::class.java))
+
+                    // Ir a LoadingActivity con información de si es nuevo usuario
+                    val intent = Intent(this, LoadingActivity::class.java)
+                    intent.putExtra("isFirstTime", isNewUser)
+                    startActivity(intent)
                     finish()
                 } else {
+                    android.util.Log.e("SignInActivity", "Error de autenticación: ${task.exception?.message}", task.exception)
                     Toast.makeText(this, "Error de autenticación", Toast.LENGTH_SHORT).show()
                 }
             }
