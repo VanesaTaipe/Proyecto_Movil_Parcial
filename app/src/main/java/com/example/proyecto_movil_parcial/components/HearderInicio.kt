@@ -13,28 +13,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 @Composable
-fun HearderInicio( title: String,
-                      backgroundColor: Color = Color(0xFFD3BCA0),
-                      textColor: Color = Color.Black,
-                      modifier: Modifier = Modifier
+fun HearderInicio(
+    title: String,
+    backgroundColor: Color = Color(0xFFD3BCA0),
+    textColor: Color = Color.Black,
+    modifier: Modifier = Modifier
 ) {
     Box(
-    modifier = modifier
-    .fillMaxWidth()
-    .height(80.dp) // Altura fija para todas las cabeceras
-    .background(backgroundColor),
-    contentAlignment = Alignment.Center
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .background(backgroundColor),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = title,
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
             color = textColor,
             textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(top = 25.dp)
@@ -46,6 +51,14 @@ fun HearderInicio( title: String,
 @Composable
 fun HeaderPreview() {
     MaterialTheme {
-        HearderInicio(title = "Hola")
+        HearderInicio(title = "¡Hola, Vanesa Nelsy Morales Taipe! 👋")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HeaderShortPreview() {
+    MaterialTheme {
+        HearderInicio(title = "¡Hola, Usuario! 👋")
     }
 }

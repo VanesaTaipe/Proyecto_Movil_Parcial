@@ -50,30 +50,39 @@ fun PerfScreen(
 ) {
     val context = LocalContext.current
     var maxPalabrasDia by remember { mutableStateOf<Int?>(null) }
-    var palabrasAprendidasHoy by remember { mutableStateOf(0) }
+    var totalPalabras by remember { mutableStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     var showEditDialog by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
 
-    // Cargar maxPalabrasDia desde Firestore
+    // Cargar datos desde Firestore
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
         val currentUser = auth.currentUser
 
         if (currentUser != null) {
+            // Cargar configuración del usuario
             firestore.collection("users")
                 .document(currentUser.uid)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         maxPalabrasDia = document.getLong("maxPalabrasDia")?.toInt()
-
-                        // Aquí se va agreagar la lógica para contar palabras aprendidas hoy
-                        // Por ahora uso un valor simulado
-                        palabrasAprendidasHoy = 3 // Este valor vendría ser lógica de conteo
                     }
-                    isLoading = false
+
+                    // Cargar total de palabras del usuario con listener en tiempo real
+                    firestore.collection("palabras")
+                        .whereEqualTo("userId", currentUser.uid)
+                        .addSnapshotListener { querySnapshot, error ->
+                            if (error != null) {
+                                Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
+                                return@addSnapshotListener
+                            }
+
+                            totalPalabras = querySnapshot?.size() ?: 0
+                            isLoading = false
+                        }
                 }
                 .addOnFailureListener {
                     isLoading = false
@@ -104,7 +113,7 @@ fun PerfScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        // Progreso del día
+        // Progreso del usuario
         if (!isLoading && maxPalabrasDia != null) {
             Card(
                 modifier = Modifier
@@ -119,7 +128,7 @@ fun PerfScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Progreso",
+                        text = "Tu Progreso",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -133,39 +142,31 @@ fun PerfScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Palabras aprendidas:",
+                                text = "Total de palabras:",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                             Text(
-                                text = "$palabrasAprendidasHoy / ${maxPalabrasDia}",
+                                text = "$totalPalabras",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
 
-                        // Indicador de progreso circular
-                        val progreso = if (maxPalabrasDia!! > 0) (palabrasAprendidasHoy.toFloat() / maxPalabrasDia!!).coerceIn(0f, 1f) else 0f
-                        val colorProgreso = when {
-                            progreso >= 1f -> Color(0xFF4CAF50) // Verde
-                            progreso >= 0.5f -> Color(0xFFFF9800) // Naranja
-                            else -> Color(0xFFF44336) // Rojo
-                        }
-
+                        // Ícono de diccionario
                         Box(
                             modifier = Modifier
                                 .background(
-                                    color = colorProgreso.copy(alpha = 0.2f),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                                     shape = androidx.compose.foundation.shape.CircleShape
-                                ),
+                                )
+                                .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "${(progreso * 100).toInt()}%",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = colorProgreso
+                                text = "📚",
+                                fontSize = 24.sp
                             )
                         }
                     }
@@ -185,7 +186,7 @@ fun PerfScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Meta",
+                    text = "Tu Meta Diaria",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -198,7 +199,7 @@ fun PerfScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Palabras:",
+                            text = "Palabras por día:",
                             fontSize = 14.sp,
                             color = Color.Gray
                         )
@@ -414,22 +415,6 @@ fun PerfScreenPreview() {
         PerfScreen(
             userName = "Hola, Usuario",
             onSignOut = {}
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "Edit Dialog Preview"
-)
-@Composable
-fun EditMaxPalabrasDialogPreview() {
-    MaterialTheme {
-        EditMaxPalabrasDialog(
-            currentValue = 15,
-            isUpdating = false,
-            onDismiss = {},
-            onConfirm = {}
         )
     }
 }

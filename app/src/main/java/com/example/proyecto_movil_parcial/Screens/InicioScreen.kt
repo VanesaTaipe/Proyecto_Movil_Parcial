@@ -2,16 +2,22 @@ package com.example.proyecto_movil_parcial.Screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.*
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -25,14 +31,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.example.proyecto_movil_parcial.components.AddDocumentIcon
+import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-
 @Composable
-fun InicioScreen() {
+fun InicioScreen(
+    onNavigateToNewWord: () -> Unit = {}
+) {
     val context = LocalContext.current
     var maxPalabras by remember { mutableStateOf<Int?>(null) }
+    var palabrasActuales by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var userName by remember { mutableStateOf("") }
 
@@ -45,6 +57,7 @@ fun InicioScreen() {
         if (currentUser != null) {
             userName = currentUser.displayName ?: "Usuario"
 
+            // Cargar configuración del usuario
             firestore.collection("users")
                 .document(currentUser.uid)
                 .get()
@@ -52,7 +65,23 @@ fun InicioScreen() {
                     if (document.exists()) {
                         maxPalabras = document.getLong("maxPalabrasDia")?.toInt()
                     }
-                    isLoading = false
+
+                    // Cargar palabras actuales del usuario
+                    firestore.collection("palabras")
+                        .whereEqualTo("userId", currentUser.uid)
+                        .addSnapshotListener { snapshot, error ->
+                            if (error != null) {
+                                Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
+                                return@addSnapshotListener
+                            }
+
+                            val palabras = snapshot?.documents?.mapNotNull { document ->
+                                document.getString("palabra")
+                            } ?: emptyList()
+
+                            palabrasActuales = palabras
+                            isLoading = false
+                        }
                 }
                 .addOnFailureListener {
                     isLoading = false
@@ -64,71 +93,227 @@ fun InicioScreen() {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Saludo personalizado
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "¡Hola, $userName! 👋",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-
-                Text(
-                    text = "¿Listo para aprender nuevas palabras hoy?",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-        }
-
-
-
-        // Sección principal para contenido de palabras
-        Text(
-            text = "Tus palabras en frase",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+        // Header personalizado con saludo
+        HearderInicio(
+            title = if (isLoading) "Cargando..." else "¡Hola, $userName! 👋"
         )
 
-        Box(
+        // Contenido principal
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(
-                    Color.LightGray,
-                    shape = RoundedCornerShape(12.dp)
-                )
+                .fillMaxSize()
                 .padding(16.dp),
-            contentAlignment = Alignment.Center
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isLoading) {
-                Text(
-                    text = "Cargando...",
-                    textAlign = TextAlign.Center,
-                    color = Color.DarkGray
-                )
-            } else {
-                Text(
-                    text = " para empezar",
-                    textAlign = TextAlign.Center,
-                    color = Color.DarkGray
-                )
+            // Mostrar estado actual de palabras
+            if (!isLoading && maxPalabras != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Tus palabras:",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = "${palabrasActuales.size} / $maxPalabras",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+
+                            // Indicador visual del límite
+                            val progress = if (maxPalabras!! > 0) palabrasActuales.size.toFloat() / maxPalabras!! else 0f
+                            val colorIndicador = when {
+                                palabrasActuales.size >= maxPalabras!! -> Color(0xFFF44336) // Rojo - límite alcanzado
+                                progress >= 0.8f -> Color(0xFFFF9800) // Naranja - cerca del límite
+                                else -> Color(0xFF4CAF50) // Verde - bien
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = colorIndicador.copy(alpha = 0.2f),
+                                        shape = androidx.compose.foundation.shape.CircleShape
+                                    )
+                                    .padding(12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = when {
+                                        palabrasActuales.size >= maxPalabras!! -> "🔴"
+                                        progress >= 0.8f -> "🟡"
+                                        else -> "🟢"
+                                    },
+                                    fontSize = 20.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sección principal para contenido de palabras
+            Text(
+                text = "Tus palabras en frase",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(
+                        Color.LightGray,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    Text(
+                        text = "Cargando...",
+                        textAlign = TextAlign.Center,
+                        color = Color.DarkGray
+                    )
+                } else if (palabrasActuales.isEmpty()) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Aún no tienes palabras nuevas buscadas",
+                            textAlign = TextAlign.Center,
+                            color = Color.DarkGray,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = "¡Usa el botón 'Nueva palabra' para empezar!",
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                } else {
+                    // Mostrar las palabras actuales
+                    LazyColumn(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(palabrasActuales) { palabra ->
+                            Text(
+                                text = "• ${palabra.replaceFirstChar { it.uppercase() }}",
+                                fontSize = 14.sp,
+                                color = Color.DarkGray,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Título "Nueva palabra"
+            Text(
+                text = "Nueva palabra",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+
+            // Botón "Nueva palabra" clickeable con diseño de tu imagen
+            val puedeAgregarPalabra = maxPalabras?.let { palabrasActuales.size < it } ?: true
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clickable(enabled = puedeAgregarPalabra) {
+                        if (puedeAgregarPalabra) {
+                            onNavigateToNewWord()
+                        } else {
+                            Toast.makeText(context, "Has alcanzado tu límite de $maxPalabras palabras", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = if (puedeAgregarPalabra)
+                        Color(0xFFEBDABF)
+                    else
+                        Color(0xFFE0E0E0) // Gris cuando está deshabilitado
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (puedeAgregarPalabra) {
+                        AddDocumentIcon(
+                            modifier = Modifier.size(64.dp),
+                            color = Color(0xFF8B7355)
+                        )
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "🚫",
+                                fontSize = 32.sp
+                            )
+                            Text(
+                                text = "Límite alcanzado",
+                                fontSize = 12.sp,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Mensaje informativo si está cerca del límite
+            if (!isLoading && maxPalabras != null) {
+                val restantes = maxPalabras!! - palabrasActuales.size
+                when {
+                    restantes == 0 -> {
+                        Text(
+                            text = "⚠️ Has alcanzado tu límite de $maxPalabras palabras. Ve al perfil para aumentarlo.",
+                            fontSize = 12.sp,
+                            color = Color(0xFFF44336),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    restantes <= 2 -> {
+                        Text(
+                            text = "⚡ Te quedan $restantes palabras por agregar",
+                            fontSize = 12.sp,
+                            color = Color(0xFFFF9800),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
     }

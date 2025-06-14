@@ -13,12 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.proyecto_movil_parcial.Screens.DesScreen
 import com.example.proyecto_movil_parcial.Screens.DicScreen
+import com.example.proyecto_movil_parcial.Screens.InicioScreen
+import com.example.proyecto_movil_parcial.Screens.IntenScreen
+import com.example.proyecto_movil_parcial.Screens.NuevPaScreen
+import com.example.proyecto_movil_parcial.Screens.PerfScreen
+import com.example.proyecto_movil_parcial.Screens.ResultaScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -28,10 +35,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
 import com.example.proyecto_movil_parcial.navigation.Screen
-import com.example.proyecto_movil_parcial.Screens.InicioScreen
-import com.example.proyecto_movil_parcial.Screens.PerfScreen
-
-
 
 class MainActivity : ComponentActivity() {
 
@@ -93,10 +96,20 @@ fun MainNavigationScreen(
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
 
+    // Función para determinar si mostrar bottom navigation
+    val shouldShowBottomBar = when (currentRoute?.destination?.route) {
+        Screen.NuevaPalabra.rout,
+        Screen.Intentar.rout,
+        "resultado_screen/{palabra}/{esCorrecta}" -> false
+        else -> true
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(navController)
+            if (shouldShowBottomBar) {
+                BottomNavigationBar(navController)
+            }
         }
     ) { innerPadding ->
         NavHost(
@@ -104,27 +117,101 @@ fun MainNavigationScreen(
             startDestination = Screen.Inico.rout,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // Pantallas principales con bottom navigation
             composable(route = Screen.Inico.rout) {
-                InicioScreen()
+                InicioScreen(
+                    onNavigateToNewWord = {
+                        navController.navigate(Screen.NuevaPalabra.rout)
+                    }
+                )
             }
+
             composable(route = Screen.Diccionario.rout) {
                 DicScreen()
             }
+
             composable(route = Screen.Desafíos.rout) {
                 DesScreen()
             }
+
             composable(route = Screen.Perfil.rout) {
                 PerfScreen(
-                        userName = userName,
-                        onSignOut = onSignOut
+                    userName = userName,
+                    onSignOut = onSignOut
+                )
+            }
+
+            // Flujo de aprendizaje sin bottom navigation
+            composable(route = Screen.NuevaPalabra.rout) {
+                NuevPaScreen(
+                    onWordAdded = { palabra ->
+                        // Navegar a "Intenta adivinar" con la palabra
+                        navController.navigate("intenta_adivinar/$palabra") {
+                            popUpTo(Screen.NuevaPalabra.rout) { inclusive = true }
+                        }
+                    },
+                    onCancel = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.Intentar.rout + "/{palabra}",
+                arguments = listOf(navArgument("palabra") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val palabra = backStackEntry.arguments?.getString("palabra") ?: ""
+                IntenScreen(
+                    palabra = palabra,
+                    onResult = { esCorrecta ->
+                        navController.navigate("resultado_screen/$palabra/$esCorrecta") {
+                            popUpTo(Screen.Intentar.rout + "/{palabra}") { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "resultado_screen/{palabra}/{esCorrecta}",
+                arguments = listOf(
+                    navArgument("palabra") { type = NavType.StringType },
+                    navArgument("esCorrecta") { type = NavType.BoolType }
+                )
+            ) { backStackEntry ->
+                val palabra = backStackEntry.arguments?.getString("palabra") ?: ""
+                val esCorrecta = backStackEntry.arguments?.getBoolean("esCorrecta") ?: false
+
+                ResultaScreen(
+                    palabra = palabra,
+                    esCorrecta = esCorrecta,
+                    onAddToDictionary = {
+                        // Navegar al diccionario y limpiar back stack
+                        navController.navigate(Screen.Diccionario.rout) {
+                            popUpTo(Screen.Inico.rout) {
+                                inclusive = false
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onBackToHome = {
+                        // Volver al inicio y limpiar back stack
+                        navController.navigate(Screen.Inico.rout) {
+                            popUpTo(Screen.Inico.rout) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 )
             }
         }
     }
 }
+
 @Preview
 @Composable
-fun prueba(){
+fun MainNavigationPreview(){
     MaterialTheme {
         MainNavigationScreen("VANESA") { }
     }
