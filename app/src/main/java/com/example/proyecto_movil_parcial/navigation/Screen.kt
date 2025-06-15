@@ -8,4 +8,7 @@ sealed class Screen(val rout: String) {
     object NuevaPalabra: Screen("nueva_palabra")
     object Intentar: Screen("intenta_adivinar")
     object Resultado: Screen("resultado_screen/{palabra}/{esCorrecta}")
+
+    object CrearOracion: Screen("crear_oracion")
+    object ResultadoOracion: Screen("resultado_oracion")
 }

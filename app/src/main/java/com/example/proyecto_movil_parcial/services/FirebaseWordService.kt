@@ -9,20 +9,13 @@ data class PalabraAgregada(
     val palabra: String = "",
     val userId: String = "",
     val fechaAgregada: com.google.firebase.Timestamp = com.google.firebase.Timestamp.now(),
-
-    // Contenido en inglés
     val meaningEnglish: String = "",
     val howToUseEnglish: String = "",
-
-    // Contenido en español
     val meaningSpanish: String = "",
     val howToUseSpanish: String = "",
-
-    // Ejemplos solo en inglés
     val examples: List<String> = emptyList()
 )
 
-// Servicio para Firebase
 class FirebaseWordService {
 
     private val auth = FirebaseAuth.getInstance()
@@ -40,16 +33,10 @@ class FirebaseWordService {
                 palabra = palabra.lowercase().trim(),
                 userId = currentUser.uid,
                 fechaAgregada = com.google.firebase.Timestamp.now(),
-
-                // Contenido en inglés
                 meaningEnglish = completeContent.meaningEnglish,
                 howToUseEnglish = completeContent.howToUseEnglish,
-
-                // Contenido en español
                 meaningSpanish = completeContent.meaningSpanish,
                 howToUseSpanish = completeContent.howToUseSpanish,
-
-                // Ejemplos solo en inglés
                 examples = completeContent.examples
             )
 
@@ -64,7 +51,6 @@ class FirebaseWordService {
         }
     }
 
-    // Obtener todas las palabras del usuario
     suspend fun getPalabrasAgregadas(): List<PalabraAgregada> {
         return try {
             val currentUser = auth.currentUser ?: return emptyList()
@@ -76,7 +62,6 @@ class FirebaseWordService {
 
             val palabras = query.documents.mapNotNull { document ->
                 try {
-                    // Convierte el documento y le asigna su ID
                     val palabra = document.toObject(PalabraAgregada::class.java)
                     palabra?.id = document.id
                     palabra
@@ -85,7 +70,6 @@ class FirebaseWordService {
                 }
             }
 
-            // Ordenar por fecha (más reciente primero)
             palabras.sortedByDescending { it.fechaAgregada.seconds }
 
         } catch (e: Exception) {
@@ -93,7 +77,6 @@ class FirebaseWordService {
         }
     }
 
-    // Función para eliminar una palabra por su ID
     suspend fun deletePalabraAgregada(palabraId: String): Result<Unit> {
         return try {
             val currentUser = auth.currentUser
@@ -111,8 +94,6 @@ class FirebaseWordService {
         }
     }
 
-
-    // Verificar si palabra ya existe
     suspend fun palabraYaExiste(palabra: String): Boolean {
         return try {
             val currentUser = auth.currentUser ?: return false
@@ -129,9 +110,43 @@ class FirebaseWordService {
             false
         }
     }
+
+    suspend fun getRandomPalabraAgregada(): PalabraAgregada? {
+        return try {
+            val currentUser = auth.currentUser ?: return null
+            val query = firestore.collection("palabras_agregadas")
+                .whereEqualTo("userId", currentUser.uid)
+                .get()
+                .await()
+
+            val palabras = query.documents.mapNotNull { document ->
+                document.toObject(PalabraAgregada::class.java)?.apply { id = document.id }
+            }
+
+            palabras.randomOrNull()
+
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun saveChallengeResult(result: OracionDesResult): Result<String> {
+        return try {
+            val currentUser = auth.currentUser
+                ?: return Result.failure(Exception("Usuario no encontrado"))
+
+            val resultWithUser = result.copy(userId = currentUser.uid)
+
+            val documentRef = firestore.collection("test_oraciones")
+                .add(resultWithUser)
+                .await()
+            Result.success(documentRef.id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
-// Singleton
 object FirebaseWordServiceProvider {
     val service = FirebaseWordService()
 }

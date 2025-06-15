@@ -128,8 +128,6 @@ fun InicioScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
-
-                            // Indicador visual del límite
                             val progress = if (maxPalabras!! > 0) palabrasActuales.size.toFloat() / maxPalabras!! else 0f
                             val colorIndicador = when {
                                 palabrasActuales.size >= maxPalabras!! -> Color(0xFFF44336)
@@ -190,7 +188,7 @@ fun InicioScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Aún no tienes palabras nuevas buscadas",
+                            text = "aún no tienes palabras nuevas buscadas",
                             textAlign = TextAlign.Center,
                             color = Color.DarkGray,
                             fontSize = 16.sp,
@@ -221,7 +219,6 @@ fun InicioScreen(
                 }
             }
 
-            // Título "Nueva palabra"
             Text(
                 text = "Nueva palabra",
                 fontSize = 18.sp,
@@ -230,7 +227,6 @@ fun InicioScreen(
                 modifier = Modifier.padding(top = 16.dp)
             )
 
-            // Botón "Nueva palabra"
             val puedeAgregarPalabra = maxPalabras?.let { palabrasActuales.size < it } ?: true
 
             Card(
@@ -281,7 +277,6 @@ fun InicioScreen(
                 }
             }
 
-            // Mensaje informativo
             if (!isLoading && maxPalabras != null) {
                 val restantes = maxPalabras!! - palabrasActuales.size
                 when {

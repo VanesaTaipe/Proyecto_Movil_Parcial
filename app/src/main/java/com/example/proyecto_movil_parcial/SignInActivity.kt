@@ -32,7 +32,6 @@ class SignInActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
 
-    // Registro del launcher para la actividad de inicio de sesión de Google
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -41,28 +40,19 @@ class SignInActivity : ComponentActivity() {
             val account = task.getResult(ApiException::class.java)
             account.idToken?.let { firebaseAuthWithGoogle(it) }
         } catch (e: ApiException) {
-            android.util.Log.e("SignInActivity", "Google sign in failed: ${e.message}", e)
-            Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Falló el inicio de sesión con Google", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Inicializar Firebase Auth
         auth = FirebaseAuth.getInstance()
-
-        // Verificar si el usuario ya está autenticado
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            android.util.Log.d("SignInActivity", "Usuario ya autenticado, redirigiendo a LoadingActivity")
-            // El usuario ya está conectado, ir a LoadingActivity para verificar estado
+        if (auth.currentUser != null) {
             startActivity(Intent(this, LoadingActivity::class.java))
             finish()
             return
         }
 
-        // Configurar la UI con Compose
         setContent {
             MaterialTheme {
                 Surface(
@@ -84,8 +74,6 @@ class SignInActivity : ComponentActivity() {
             .build()
 
         val googleSignInClient = GoogleSignIn.getClient(this, gso)
-
-        // Cerrar sesión primero para asegurar selección de cuenta
         googleSignInClient.signOut().addOnCompleteListener {
             val signInIntent = googleSignInClient.signInIntent
             signInLauncher.launch(signInIntent)
@@ -98,20 +86,10 @@ class SignInActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    val isNewUser = task.result?.additionalUserInfo?.isNewUser ?: false
-
-                    android.util.Log.d("SignInActivity", "Auth exitoso - Usuario: ${user?.displayName}")
-                    android.util.Log.d("SignInActivity", "Es nuevo usuario: $isNewUser")
-
                     Toast.makeText(this, "Bienvenido ${user?.displayName}", Toast.LENGTH_SHORT).show()
-
-                    // Ir a LoadingActivity con información de si es nuevo usuario
-                    val intent = Intent(this, LoadingActivity::class.java)
-                    intent.putExtra("isFirstTime", isNewUser)
-                    startActivity(intent)
+                    startActivity(Intent(this, LoadingActivity::class.java))
                     finish()
                 } else {
-                    android.util.Log.e("SignInActivity", "Error de autenticación: ${task.exception?.message}", task.exception)
                     Toast.makeText(this, "Error de autenticación", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -126,7 +104,6 @@ fun SimpleGoogleLoginScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Imagen que ocupa toda la parte superior (70% de la pantalla)
         Image(
             painter = painterResource(id = R.drawable.imagelogin),
             contentDescription = "Login illustration",
@@ -135,19 +112,15 @@ fun SimpleGoogleLoginScreen(
                 .weight(0.7f),
             contentScale = ContentScale.Crop
         )
-
-        // Contenido en la parte inferior (30% de la pantalla)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.3f)
                 .background(Color.White)
-                .padding(horizontal = 32.dp)
-                .padding(vertical = 16.dp),
+                .padding(horizontal = 32.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Título de la app
             Text(
                 text = "AiWordFlow",
                 fontSize = 28.sp,
@@ -155,8 +128,6 @@ fun SimpleGoogleLoginScreen(
                 color = Color.Black,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-
-            // Descripción
             Text(
                 text = "Crea tu diccionario personal,\naprende con IA y mejora tu\nvocabulario creando oraciones",
                 fontSize = 20.sp,
@@ -165,8 +136,6 @@ fun SimpleGoogleLoginScreen(
                 lineHeight = 20.sp,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-
-            // Botón de Google Sign In
             GoogleSignInButton(
                 onClick = onGoogleLoginClick
             )
@@ -195,15 +164,12 @@ fun GoogleSignInButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // Icono de Google
             Image(
                 painter = painterResource(id = R.drawable.google),
                 contentDescription = "Google Logo",
                 modifier = Modifier.size(24.dp)
             )
-
             Spacer(modifier = Modifier.width(12.dp))
-
             Text(
                 text = "Iniciar sesión con Google",
                 color = Color.Black,
@@ -214,16 +180,10 @@ fun GoogleSignInButton(
     }
 }
 
-@Preview(
-    showBackground = true,
-    widthDp = 360,
-    heightDp = 640
-)
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun SimpleGoogleLoginPreview() {
     MaterialTheme {
-        SimpleGoogleLoginScreen(
-            onGoogleLoginClick = { }
-        )
+        SimpleGoogleLoginScreen(onGoogleLoginClick = { })
     }
 }

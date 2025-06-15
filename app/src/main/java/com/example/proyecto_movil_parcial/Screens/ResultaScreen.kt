@@ -1,7 +1,6 @@
 package com.example.proyecto_movil_parcial.Screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,27 +18,33 @@ import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
 import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun ResultaScreen(
-    palabra: String = "",
-    esCorrecta: Boolean = false,
-    exercise: QuickExerciseResponse? = null,
-    onAddToDictionary: () -> Unit = {},
-    onBackToHome: () -> Unit = {}
+    palabra: String,
+    esCorrecta: Boolean,
+    exerciseJson: String,
+    onAddToDictionary: () -> Unit,
+    onBackToHome: () -> Unit
 ) {
     var isProcessing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val exercise = remember {
+        try {
+            val decodedJson = URLDecoder.decode(exerciseJson, StandardCharsets.UTF_8.toString())
+            Gson().fromJson(decodedJson, QuickExerciseResponse::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        HearderInicio(
-            title = "Nueva Palabra"
-        )
-
+    Column(modifier = Modifier.fillMaxSize()) {
+        HearderInicio(title = "Nueva Palabra")
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -48,19 +53,13 @@ fun ResultaScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(40.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = if (esCorrecta) "✅" else "💪",
-                    fontSize = 24.sp
-                )
-
+                Text(text = if (esCorrecta) "✅" else "💪", fontSize = 24.sp)
                 Spacer(modifier = Modifier.width(12.dp))
-
                 Text(
                     text = if (esCorrecta) "¡Bien hecho!" else "¡Sigue intentando!",
                     fontSize = 18.sp,
@@ -68,19 +67,13 @@ fun ResultaScreen(
                     color = Color.Black
                 )
             }
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFD3BCA0)
-                ),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFD3BCA0)),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    // Palabra
+                Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         text = palabra.replaceFirstChar { it.uppercase() },
                         fontSize = 28.sp,
@@ -88,8 +81,6 @@ fun ResultaScreen(
                         color = Color.Black,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-
-                    // Definición
                     Text(
                         text = exercise?.definition ?: "Definición no disponible",
                         fontSize = 16.sp,
@@ -99,44 +90,23 @@ fun ResultaScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.weight(1f))
-
             Button(
                 onClick = {
                     isProcessing = true
-
                     scope.launch {
                         try {
-                            // Verificar si ya existe
                             val yaExiste = FirebaseWordServiceProvider.service.palabraYaExiste(palabra)
-
                             if (yaExiste) {
-                                Toast.makeText(
-                                    context,
-                                    "Esta palabra ya está en tu diccionario",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(context, "Esta palabra ya está en tu diccionario", Toast.LENGTH_SHORT).show()
                                 onAddToDictionary()
                                 return@launch
                             }
-
-                            // Generar contenido completo
                             val completeContent = OpenAIServiceProvider.service.generateCompleteWordContent(palabra)
-
                             if (completeContent != null) {
-                                val result = FirebaseWordServiceProvider.service.savePalabraAgregada(
-                                    palabra = palabra,
-                                    completeContent = completeContent
-                                )
-
+                                val result = FirebaseWordServiceProvider.service.savePalabraAgregada(palabra, completeContent)
                                 if (result.isSuccess) {
-                                    Toast.makeText(
-                                        context,
-                                        "¡Palabra agregada al diccionario!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
+                                    Toast.makeText(context, "¡Palabra agregada al diccionario!", Toast.LENGTH_SHORT).show()
                                     onAddToDictionary()
                                 } else {
                                     throw result.exceptionOrNull() ?: Exception("Error desconocido")
@@ -144,13 +114,8 @@ fun ResultaScreen(
                             } else {
                                 throw Exception("No se pudo generar contenido completo")
                             }
-
                         } catch (e: Exception) {
-                            Toast.makeText(
-                                context,
-                                "Error: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                         } finally {
                             isProcessing = false
                         }
@@ -159,51 +124,23 @@ fun ResultaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFCEA3D9)
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCEA3D9)),
                 shape = RoundedCornerShape(28.dp),
                 enabled = !isProcessing
             ) {
                 if (isProcessing) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
+                    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Generando contenido...",
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Text(text = "Generando contenido...", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                 } else {
-                    Text(
-                        text = "Agregar al diccionario",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text(text = "Agregar al diccionario", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
             }
-
-            TextButton(
-                onClick = onBackToHome,
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text(
-                    text = "Volver al inicio",
-                    color = Color.Gray,
-                    fontSize = 14.sp
-                )
+            TextButton(onClick = onBackToHome, modifier = Modifier.padding(top = 8.dp)) {
+                Text(text = "Volver al inicio", color = Color.Gray, fontSize = 14.sp)
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -212,37 +149,13 @@ fun ResultaScreen(
 @Preview(showBackground = true)
 @Composable
 fun ResultaScreenCorrectaPreview() {
-    MaterialTheme {
-        val sampleExercise = QuickExerciseResponse(
-            definition = "Ephemeral means something that lasts for a very short time, like a gust of wind or a digital notification that disappears once read. Its beauty or impact often comes from its briefness.",
-            correctSentence = "",
-            incorrectSentence = "",
-            options = emptyList()
-        )
-
-        ResultaScreen(
-            palabra = "Ephemeral",
-            esCorrecta = true,
-            exercise = sampleExercise
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ResultaScreenIncorrectaPreview() {
-    MaterialTheme {
-        val sampleExercise = QuickExerciseResponse(
-            definition = "Ephemeral means something that lasts for a very short time, like a gust of wind or a digital notification that disappears once read. Its beauty or impact often comes from its briefness.",
-            correctSentence = "",
-            incorrectSentence = "",
-            options = emptyList()
-        )
-
-        ResultaScreen(
-            palabra = "Ephemeral",
-            esCorrecta = false,
-            exercise = sampleExercise
-        )
-    }
+    val sampleExercise = QuickExerciseResponse("Definition here", "", "", emptyList())
+    val json = Gson().toJson(sampleExercise)
+    ResultaScreen(
+        palabra = "Ephemeral",
+        esCorrecta = true,
+        exerciseJson = json,
+        onAddToDictionary = {},
+        onBackToHome = {}
+    )
 }

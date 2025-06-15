@@ -166,17 +166,14 @@ fun DicScreen() {
                             onDeleteClick = {
                                 scope.launch {
                                     try {
-                                        // 1. Llamar al servicio para borrar de Firebase
                                         val result = FirebaseWordServiceProvider.service.deletePalabraAgregada(palabra.id)
                                         if (result.isSuccess) {
-                                            // 2. Actualizar la lista local para que la UI reaccione
                                             palabrasGuardadas = palabrasGuardadas.filter { it.id != palabra.id }
                                             Toast.makeText(context, "'${palabra.palabra}' eliminada", Toast.LENGTH_SHORT).show()
                                         } else {
                                             throw result.exceptionOrNull() ?: Exception("Error desconocido")
                                         }
                                     } catch (e: Exception) {
-                                        // 3. Manejar errores
                                         Toast.makeText(context, "Error al eliminar: ${e.message}", Toast.LENGTH_SHORT).show()
                                     }
                                 }
@@ -213,7 +210,7 @@ fun PalabraItemSimple(
         ) {
             // Columna con el nombre y la fecha
             Column(
-                modifier = Modifier.weight(1f) // Ocupa el espacio disponible
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = palabra.palabra.replaceFirstChar { it.uppercase() },
@@ -228,8 +225,6 @@ fun PalabraItemSimple(
                     color = Color.Gray
                 )
             }
-
-            // Fila para los íconos de acción
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -254,7 +249,7 @@ fun PalabraItemSimple(
     }
 }
 
-// Función helper para formatear fechas
+// Función helper
 private fun formatearFecha(timestamp: com.google.firebase.Timestamp): String {
     val date = timestamp.toDate()
     val format = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())

@@ -23,7 +23,7 @@ fun PalabraDetalleScreen(
     onBackClick: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Meaning", "How to", "Examples")
+    val tabs = listOf("Significado", "Cómo usar?", "Ejemplos")
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -124,7 +124,6 @@ fun MeaningSection(palabra: PalabraAgregada) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Contenido principal (inglés o español)
         Text(
             text = if (showSpanish) palabra.meaningSpanish else palabra.meaningEnglish,
             fontSize = 16.sp,
@@ -158,8 +157,6 @@ fun HowToSection(palabra: PalabraAgregada) {
             color = Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-
-        // Contenido principal (inglés o español)
         Text(
             text = if (showSpanish) palabra.howToUseSpanish else palabra.howToUseEnglish,
             fontSize = 16.sp,
@@ -192,7 +189,6 @@ fun ExamplesSection(palabra: PalabraAgregada) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Lista de ejemplos (solo en inglés)
         palabra.examples.forEachIndexed { index, ejemplo ->
             Card(
                 modifier = Modifier
@@ -207,7 +203,6 @@ fun ExamplesSection(palabra: PalabraAgregada) {
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Número del ejemplo
                     Box(
                         modifier = Modifier
                             .background(
@@ -227,7 +222,6 @@ fun ExamplesSection(palabra: PalabraAgregada) {
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Texto del ejemplo
                     Text(
                         text = ejemplo,
                         fontSize = 15.sp,
