@@ -35,9 +35,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
 import com.example.proyecto_movil_parcial.navigation.Screen
+import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
+import com.example.proyecto_movil_parcial.Screens.PalabraDetalleScreen
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        var currentExercise: com.example.proyecto_movil_parcial.services.QuickExerciseResponse? = null
+    }
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -96,7 +101,6 @@ fun MainNavigationScreen(
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
 
-    // Función para determinar si mostrar bottom navigation
     val shouldShowBottomBar = when (currentRoute?.destination?.route) {
         Screen.NuevaPalabra.rout,
         Screen.Intentar.rout,
@@ -163,7 +167,9 @@ fun MainNavigationScreen(
                 val palabra = backStackEntry.arguments?.getString("palabra") ?: ""
                 IntenScreen(
                     palabra = palabra,
-                    onResult = { esCorrecta ->
+                    onResult = { esCorrecta, exercise ->
+                        MainActivity.currentExercise = exercise
+
                         navController.navigate("resultado_screen/$palabra/$esCorrecta") {
                             popUpTo(Screen.Intentar.rout + "/{palabra}") { inclusive = true }
                         }
@@ -184,6 +190,7 @@ fun MainNavigationScreen(
                 ResultaScreen(
                     palabra = palabra,
                     esCorrecta = esCorrecta,
+                    exercise = MainActivity.currentExercise, // 🎯 PASAR ejercicio
                     onAddToDictionary = {
                         // Navegar al diccionario y limpiar back stack
                         navController.navigate(Screen.Diccionario.rout) {

@@ -15,18 +15,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
+import com.example.proyecto_movil_parcial.services.ExerciseOption
+import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
+import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
+import kotlinx.coroutines.launch
 
 @Composable
 fun IntenScreen(
     palabra: String = "",
-    onResult: (Boolean) -> Unit = {}
+    onResult: (Boolean, QuickExerciseResponse?) -> Unit = { _, _ -> }
 ) {
     var selectedOption by remember { mutableStateOf(-1) }
     var isLoading by remember { mutableStateOf(false) }
+    var exercise by remember { mutableStateOf<QuickExerciseResponse?>(null) }
+    var isLoadingExercise by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Opciones de ejemplo - en una implementación real, estas vendrían de una API de IA
-    val opciones = remember {
-        generateOptionsForWord(palabra)
+    val scope = rememberCoroutineScope()
+
+    // Cargar ejercicio desde OpenAI cuando se inicia la pantalla
+    LaunchedEffect(palabra) {
+        scope.launch {
+            isLoadingExercise = true
+            errorMessage = null
+
+            try {
+                val exerciseResponse = OpenAIServiceProvider.service.generateQuickExercise(palabra)
+
+                if (exerciseResponse != null) {
+                    exercise = exerciseResponse
+                    android.util.Log.d("IntenScreen", "Exercise loaded: ${exerciseResponse.options.size} options")
+                } else {
+                    errorMessage = "Error generando ejercicio, usando versión básica"
+                    // Crear ejercicio fallback
+                    exercise = createFallbackExercise(palabra)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("IntenScreen", "Error loading exercise: ${e.message}")
+                errorMessage = "Sin conexión a IA, usando ejercicio básico"
+                exercise = createFallbackExercise(palabra)
+            } finally {
+                isLoadingExercise = false
+            }
+        }
     }
 
     Column(
@@ -85,13 +116,58 @@ fun IntenScreen(
                 )
             }
 
-            // Opciones de respuesta
-            opciones.forEachIndexed { index, opcion ->
-                OpcionItem(
-                    texto = opcion.texto,
-                    isSelected = selectedOption == index,
-                    onClick = { selectedOption = index }
-                )
+            // Mostrar mensaje de error si existe
+            errorMessage?.let { message ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFFF3CD)
+                    )
+                ) {
+                    Text(
+                        text = "⚠️ $message",
+                        modifier = Modifier.padding(12.dp),
+                        fontSize = 12.sp,
+                        color = Color(0xFF856404)
+                    )
+                }
+            }
+
+            // Loading o opciones
+            if (isLoadingExercise) {
+                // Estado de carga
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "🤖 Generando ejercicio con IA...",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            } else {
+                // 🎯 Mostrar 2 opciones
+                val currentExercise = exercise
+                if (currentExercise != null) {
+                    currentExercise.options.forEachIndexed { index, opcion ->
+                        OpcionItem(
+                            texto = opcion.text,
+                            isSelected = selectedOption == index,
+                            onClick = { selectedOption = index }
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -99,10 +175,13 @@ fun IntenScreen(
             // Botón Verificar
             Button(
                 onClick = {
-                    if (selectedOption != -1) {
+                    val currentExercise = exercise
+                    if (selectedOption != -1 && currentExercise != null) {
                         isLoading = true
-                        val esCorrecta = opciones[selectedOption].esCorrecta
-                        onResult(esCorrecta)
+                        val esCorrecta = currentExercise.options[selectedOption].isCorrect
+
+                        //
+                        onResult(esCorrecta, currentExercise)
                     }
                 },
                 modifier = Modifier
@@ -112,7 +191,7 @@ fun IntenScreen(
                     containerColor = Color(0xFFCEA3D9)
                 ),
                 shape = RoundedCornerShape(24.dp),
-                enabled = !isLoading && selectedOption != -1
+                enabled = !isLoading && !isLoadingExercise && selectedOption != -1
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -173,44 +252,25 @@ fun OpcionItem(
     }
 }
 
-// Datos para las opciones
-data class OpcionRespuesta(
-    val texto: String,
-    val esCorrecta: Boolean
-)
-
-// Función para generar opciones (en una implementación real, esto vendría de una API de IA)
-private fun generateOptionsForWord(palabra: String): List<OpcionRespuesta> {
-    return when (palabra.lowercase()) {
+// Función fallback para casos donde no funciona la API
+private fun createFallbackExercise(palabra: String): QuickExerciseResponse {
+    val options = when (palabra.lowercase()) {
         "ephemeral" -> listOf(
-            OpcionRespuesta(
-                texto = "Cherry blossoms are so ephemeral that they only last for a few days in spring.",
-                esCorrecta = true
-            ),
-            OpcionRespuesta(
-                texto = "The ephemeral building was constructed to last for centuries.",
-                esCorrecta = false
-            ),
-            OpcionRespuesta(
-                texto = "Social media fame tends to be ephemeral, intense but short-lived.",
-                esCorrecta = true
-            )
+            ExerciseOption("The ephemeral beauty of cherry blossoms attracts many visitors.", true),
+            ExerciseOption("The ephemeral building was designed to last for centuries.", false)
         )
         else -> listOf(
-            OpcionRespuesta(
-                texto = "The $palabra was very important in the story.",
-                esCorrecta = true
-            ),
-            OpcionRespuesta(
-                texto = "She decided to $palabra the difficult situation.",
-                esCorrecta = false
-            ),
-            OpcionRespuesta(
-                texto = "The weather was $palabra and pleasant today.",
-                esCorrecta = false
-            )
+            ExerciseOption("The meaning of $palabra is very important to understand.", true),
+            ExerciseOption("She decided to $palabra the difficult situation quickly.", false)
         )
-    }
+    }.shuffled()
+
+    return QuickExerciseResponse(
+        definition = "A word that needs to be learned and practiced.",
+        correctSentence = options.find { it.isCorrect }?.text ?: "",
+        incorrectSentence = options.find { !it.isCorrect }?.text ?: "",
+        options = options
+    )
 }
 
 @Preview(

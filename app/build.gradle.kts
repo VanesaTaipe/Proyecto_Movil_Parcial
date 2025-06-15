@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,6 +19,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // API KEY segura
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+
+        val openaiApiKey = localProperties.getProperty("OPENAI_API_KEY") ?: "YOUR_API_KEY_HERE"
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
     }
 
     buildTypes {
@@ -28,19 +40,22 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
-
 }
+
 dependencies {
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
@@ -65,10 +80,14 @@ dependencies {
     implementation(libs.googleid)
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.firebase.auth)
-    //BottonNavigate
+
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-
+    // API calls
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Testing
     testImplementation(libs.junit)
@@ -78,5 +97,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }

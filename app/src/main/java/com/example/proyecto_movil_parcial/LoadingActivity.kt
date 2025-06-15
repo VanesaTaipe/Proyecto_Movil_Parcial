@@ -25,7 +25,6 @@ class LoadingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar Firebase
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
@@ -40,8 +39,6 @@ class LoadingActivity : ComponentActivity() {
             }
         }
 
-        // Verificar usuario al iniciar
-        android.util.Log.d("LoadingActivity", "Iniciando verificación de usuario")
         checkUserStatus()
     }
 
@@ -49,65 +46,40 @@ class LoadingActivity : ComponentActivity() {
         val currentUser = auth.currentUser
 
         if (currentUser == null) {
-            // Si no hay usuario, regresar al login
             redirectToLogin()
             return
         }
 
         val userId = currentUser.uid
-        android.util.Log.d("LoadingActivity", "Usuario ID: $userId")
-        android.util.Log.d("LoadingActivity", "Usuario email: ${currentUser.email}")
 
-        // Verificar si el usuario existe en Firestore
         firestore.collection("users")
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
                 try {
                     if (document.exists()) {
-                        // Usuario existe, verificar si es primera vez o usuario recurrente
                         val maxPalabrasDia = document.getLong("maxPalabrasDia")
-                        val fechaRegistro = document.getTimestamp("fechaRegistro")
-                        val isFirstTime = intent.getBooleanExtra("isFirstTime", false)
-
-                        android.util.Log.d("LoadingActivity", "maxPalabrasDia: $maxPalabrasDia")
-                        android.util.Log.d("LoadingActivity", "fechaRegistro: $fechaRegistro")
-                        android.util.Log.d("LoadingActivity", "isFirstTime: $isFirstTime")
 
                         when {
-                            // Si tiene maxPalabrasDia configurado, es usuario completo
                             maxPalabrasDia != null && maxPalabrasDia > 0 -> {
-                                // Actualizar último acceso y ir a MainActivity
                                 updateLastAccessAndRedirectToMain(userId)
                             }
-                            // Si no tiene maxPalabrasDia pero tiene fechaRegistro, necesita completar configuración
-                            fechaRegistro != null -> {
-                                redirectToPresentation()
-                            }
-                            // Caso extraño: documento existe pero sin datos básicos
                             else -> {
-                                android.util.Log.w("LoadingActivity", "Usuario existe pero sin datos básicos")
-                                recreateUserAndRedirectToPresentation(currentUser)
+                                redirectToPresentation()
                             }
                         }
                     } else {
-                        // Usuario no existe -> Crear y ir a PresentationActivity
                         createUserAndRedirectToPresentation(currentUser)
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("LoadingActivity", "Error procesando datos: ${e.message}", e)
-                    Toast.makeText(this, "Error procesando datos: ${e.message}",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error procesando datos", Toast.LENGTH_SHORT).show()
                     redirectToLogin()
                 }
             }
             .addOnFailureListener { exception ->
-                // Error al consultar Firestore
-                android.util.Log.e("LoadingActivity", "Error de conexión: ${exception.message}", exception)
-                Toast.makeText(this, "Error de conexión: ${exception.message}",
-                    Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error de conexión", Toast.LENGTH_LONG).show()
 
-                // Intentar de nuevo después de 3 segundos
+                // Reintentar después de 3 segundos
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     checkUserStatus()
                 }, 3000)
@@ -121,9 +93,7 @@ class LoadingActivity : ComponentActivity() {
             .addOnSuccessListener {
                 redirectToMain()
             }
-            .addOnFailureListener { exception ->
-                android.util.Log.w("LoadingActivity", "Error actualizando último acceso: ${exception.message}")
-                // Aunque falle la actualización, igual redirigir a Main
+            .addOnFailureListener {
                 redirectToMain()
             }
     }
@@ -137,50 +107,19 @@ class LoadingActivity : ComponentActivity() {
             "isNewUser" to true
         )
 
-        android.util.Log.d("LoadingActivity", "Creando nuevo usuario")
-
         firestore.collection("users")
             .document(user.uid)
             .set(userData)
             .addOnSuccessListener {
-                android.util.Log.d("LoadingActivity", "Usuario creado exitosamente")
                 redirectToPresentation()
             }
             .addOnFailureListener { exception ->
-                android.util.Log.e("LoadingActivity", "Error al crear usuario: ${exception.message}", exception)
-                Toast.makeText(this, "Error al crear usuario: ${exception.message}",
-                    Toast.LENGTH_SHORT).show()
-                redirectToLogin()
-            }
-    }
-
-    private fun recreateUserAndRedirectToPresentation(user: com.google.firebase.auth.FirebaseUser) {
-        val userData = hashMapOf(
-            "email" to user.email,
-            "displayName" to user.displayName,
-            "fechaRegistro" to com.google.firebase.Timestamp.now(),
-            "ultimoAcceso" to com.google.firebase.Timestamp.now(),
-            "isRecreated" to true
-        )
-
-        android.util.Log.d("LoadingActivity", "Recreando datos de usuario")
-
-        firestore.collection("users")
-            .document(user.uid)
-            .update(userData as Map<String, Any>)
-            .addOnSuccessListener {
-                redirectToPresentation()
-            }
-            .addOnFailureListener { exception ->
-                android.util.Log.e("LoadingActivity", "Error recreando usuario: ${exception.message}", exception)
-                Toast.makeText(this, "Error actualizando datos: ${exception.message}",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error al crear usuario", Toast.LENGTH_SHORT).show()
                 redirectToLogin()
             }
     }
 
     private fun redirectToLogin() {
-        android.util.Log.d("LoadingActivity", "Redirigiendo a login")
         val intent = Intent(this, SignInActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -188,7 +127,6 @@ class LoadingActivity : ComponentActivity() {
     }
 
     private fun redirectToPresentation() {
-        android.util.Log.d("LoadingActivity", "Redirigiendo a presentación")
         val intent = Intent(this, PresentationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -196,7 +134,6 @@ class LoadingActivity : ComponentActivity() {
     }
 
     private fun redirectToMain() {
-        android.util.Log.d("LoadingActivity", "Redirigiendo a main")
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -211,7 +148,6 @@ fun LoadingScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Spinner de carga
         CircularProgressIndicator(
             modifier = Modifier.size(64.dp),
             color = MaterialTheme.colorScheme.primary
@@ -228,7 +164,7 @@ fun LoadingScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Estamos configurando tu experiencia :3...",
+            text = "Configurando tu experiencia...",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

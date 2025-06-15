@@ -13,11 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.*
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -35,20 +32,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.example.proyecto_movil_parcial.components.AddDocumentIcon
 import com.example.proyecto_movil_parcial.components.HearderInicio
+import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @Composable
 fun InicioScreen(
     onNavigateToNewWord: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var maxPalabras by remember { mutableStateOf<Int?>(null) }
     var palabrasActuales by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var userName by remember { mutableStateOf("") }
 
-    // Cargar datos del usuario desde Firestore
+    // Cargar datos del usuario
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
@@ -57,7 +57,6 @@ fun InicioScreen(
         if (currentUser != null) {
             userName = currentUser.displayName ?: "Usuario"
 
-            // Cargar configuración del usuario
             firestore.collection("users")
                 .document(currentUser.uid)
                 .get()
@@ -66,22 +65,16 @@ fun InicioScreen(
                         maxPalabras = document.getLong("maxPalabrasDia")?.toInt()
                     }
 
-                    // Cargar palabras actuales del usuario
-                    firestore.collection("palabras")
-                        .whereEqualTo("userId", currentUser.uid)
-                        .addSnapshotListener { snapshot, error ->
-                            if (error != null) {
-                                Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
-                                return@addSnapshotListener
-                            }
-
-                            val palabras = snapshot?.documents?.mapNotNull { document ->
-                                document.getString("palabra")
-                            } ?: emptyList()
-
-                            palabrasActuales = palabras
+                    scope.launch {
+                        try {
+                            val palabras = FirebaseWordServiceProvider.service.getPalabrasAgregadas()
+                            palabrasActuales = palabras.map { it.palabra }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
+                        } finally {
                             isLoading = false
                         }
+                    }
                 }
                 .addOnFailureListener {
                     isLoading = false
@@ -95,19 +88,17 @@ fun InicioScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Header personalizado con saludo
         HearderInicio(
             title = if (isLoading) "Cargando..." else "¡Hola, $userName! 👋"
         )
 
-        // Contenido principal
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Mostrar estado actual de palabras
+            // Estado actual de palabras
             if (!isLoading && maxPalabras != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -141,9 +132,9 @@ fun InicioScreen(
                             // Indicador visual del límite
                             val progress = if (maxPalabras!! > 0) palabrasActuales.size.toFloat() / maxPalabras!! else 0f
                             val colorIndicador = when {
-                                palabrasActuales.size >= maxPalabras!! -> Color(0xFFF44336) // Rojo - límite alcanzado
-                                progress >= 0.8f -> Color(0xFFFF9800) // Naranja - cerca del límite
-                                else -> Color(0xFF4CAF50) // Verde - bien
+                                palabrasActuales.size >= maxPalabras!! -> Color(0xFFF44336)
+                                progress >= 0.8f -> Color(0xFFFF9800)
+                                else -> Color(0xFF4CAF50)
                             }
 
                             Box(
@@ -169,7 +160,7 @@ fun InicioScreen(
                 }
             }
 
-            // Sección principal para contenido de palabras
+            // Sección principal
             Text(
                 text = "Tus palabras en frase",
                 fontSize = 24.sp,
@@ -215,7 +206,6 @@ fun InicioScreen(
                         )
                     }
                 } else {
-                    // Mostrar las palabras actuales
                     LazyColumn(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -240,7 +230,7 @@ fun InicioScreen(
                 modifier = Modifier.padding(top = 16.dp)
             )
 
-            // Botón "Nueva palabra" clickeable con diseño de tu imagen
+            // Botón "Nueva palabra"
             val puedeAgregarPalabra = maxPalabras?.let { palabrasActuales.size < it } ?: true
 
             Card(
@@ -258,7 +248,7 @@ fun InicioScreen(
                     containerColor = if (puedeAgregarPalabra)
                         Color(0xFFEBDABF)
                     else
-                        Color(0xFFE0E0E0) // Gris cuando está deshabilitado
+                        Color(0xFFE0E0E0)
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = RoundedCornerShape(12.dp)
@@ -291,7 +281,7 @@ fun InicioScreen(
                 }
             }
 
-            // Mensaje informativo si está cerca del límite
+            // Mensaje informativo
             if (!isLoading && maxPalabras != null) {
                 val restantes = maxPalabras!! - palabrasActuales.size
                 when {
