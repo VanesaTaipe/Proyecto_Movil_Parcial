@@ -1,4 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

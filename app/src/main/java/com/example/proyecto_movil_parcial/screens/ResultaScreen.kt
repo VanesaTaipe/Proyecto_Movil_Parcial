@@ -1,5 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
-
+package com.example.proyecto_movil_parcial.screens
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

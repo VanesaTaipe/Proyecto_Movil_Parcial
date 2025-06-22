@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.example.proyecto_movil_parcial
 
 import android.content.Intent
@@ -8,9 +9,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +61,7 @@ class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
+
         if (auth.currentUser != null) {
             startActivity(Intent(this, LoadingActivity::class.java))
             finish()
@@ -101,8 +116,7 @@ fun SimpleGoogleLoginScreen(
     onGoogleLoginClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(id = R.drawable.imagelogin),
@@ -112,6 +126,7 @@ fun SimpleGoogleLoginScreen(
                 .weight(0.7f),
             contentScale = ContentScale.Crop
         )
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,6 +143,7 @@ fun SimpleGoogleLoginScreen(
                 color = Color.Black,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
+
             Text(
                 text = "Crea tu diccionario personal,\naprende con IA y mejora tu\nvocabulario creando oraciones",
                 fontSize = 20.sp,
@@ -136,9 +152,8 @@ fun SimpleGoogleLoginScreen(
                 lineHeight = 20.sp,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-            GoogleSignInButton(
-                onClick = onGoogleLoginClick
-            )
+
+            GoogleSignInButton(onClick = onGoogleLoginClick)
         }
     }
 }
@@ -169,7 +184,9 @@ fun GoogleSignInButton(
                 contentDescription = "Google Logo",
                 modifier = Modifier.size(24.dp)
             )
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Text(
                 text = "Iniciar sesión con Google",
                 color = Color.Black,
@@ -184,6 +201,6 @@ fun GoogleSignInButton(
 @Composable
 fun SimpleGoogleLoginPreview() {
     MaterialTheme {
-        SimpleGoogleLoginScreen(onGoogleLoginClick = { })
+        SimpleGoogleLoginScreen(onGoogleLoginClick = {})
     }
 }

@@ -1,4 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
-import com.example.proyecto_movil_parcial.services.ExerciseOption
 import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
 import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
 import kotlinx.coroutines.launch

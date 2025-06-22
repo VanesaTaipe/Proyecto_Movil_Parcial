@@ -1,4 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -118,40 +118,7 @@ fun DicScreen() {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Encabezado con contador total
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Tu Progreso",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
 
-                        Text(
-                            text = "${palabrasGuardadas.size}",
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-
-                        Text(
-                            text = if (palabrasGuardadas.size == 1) "palabra aprendida" else "palabras aprendidas",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -239,7 +206,7 @@ fun PalabraItemSimple(
 
                 // Ícono para ver detalles
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.Default.MoreVert,
                     contentDescription = "Ver detalles",
                     tint = Color.Gray,
                     modifier = Modifier.size(20.dp)

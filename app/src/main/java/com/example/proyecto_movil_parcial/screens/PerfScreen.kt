@@ -1,4 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,8 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,20 +50,19 @@ fun PerfScreen(
     onSignOut: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var maxPalabrasDia by remember { mutableStateOf<Int?>(null) }
-    var totalPalabras by remember { mutableStateOf(0) }
+    var palabrasActuales by remember { mutableStateOf<List<String>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var showEditDialog by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
 
-    // Cargar datos desde Firestore
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
         val currentUser = auth.currentUser
 
         if (currentUser != null) {
-            // Cargar configuración del usuario
             firestore.collection("users")
                 .document(currentUser.uid)
                 .get()
@@ -71,18 +71,16 @@ fun PerfScreen(
                         maxPalabrasDia = document.getLong("maxPalabrasDia")?.toInt()
                     }
 
-                    // Cargar total de palabras del usuario con listener en tiempo real
-                    firestore.collection("palabras")
-                        .whereEqualTo("userId", currentUser.uid)
-                        .addSnapshotListener { querySnapshot, error ->
-                            if (error != null) {
-                                Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
-                                return@addSnapshotListener
-                            }
-
-                            totalPalabras = querySnapshot?.size() ?: 0
+                    scope.launch {
+                        try {
+                            val palabras = FirebaseWordServiceProvider.service.getPalabrasAgregadas()
+                            palabrasActuales = palabras.map { it.palabra }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error al cargar palabras del día", Toast.LENGTH_SHORT).show()
+                        } finally {
                             isLoading = false
                         }
+                    }
                 }
                 .addOnFailureListener {
                     isLoading = false
@@ -112,81 +110,20 @@ fun PerfScreen(
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 32.dp)
         )
-
-        // Progreso del usuario
-        if (!isLoading && maxPalabrasDia != null) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Tu Progreso",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Total de palabras:",
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                            )
-                            Text(
-                                text = "$totalPalabras",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-
-                        // Ícono de diccionario
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    shape = androidx.compose.foundation.shape.CircleShape
-                                )
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "📚",
-                                fontSize = 24.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // Card para mostrar la configuración actual
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Tu Meta Diaria",
+                    text = "Meta",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -199,7 +136,7 @@ fun PerfScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Palabras por día:",
+                            text = "Palabras en total:",
                             fontSize = 14.sp,
                             color = Color.Gray
                         )
@@ -233,25 +170,63 @@ fun PerfScreen(
             }
         }
 
+        if (!isLoading && maxPalabrasDia != null) {
+            val palabrasHoy = palabrasActuales.size
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Progreso:",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = "$palabrasHoy",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón de logout
         Button(
             onClick = onSignOut,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = "Cerrar Sesión",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Bold
             )
         }
     }
 
-    // Dialog para editar maxPalabrasDia
     if (showEditDialog) {
         EditMaxPalabrasDialog(
             currentValue = maxPalabrasDia ?: 0,

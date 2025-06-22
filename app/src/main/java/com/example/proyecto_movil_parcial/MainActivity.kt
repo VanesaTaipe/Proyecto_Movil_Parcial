@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.example.proyecto_movil_parcial
 
 import android.content.Intent
@@ -19,7 +20,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.proyecto_movil_parcial.Screens.*
+import com.example.proyecto_movil_parcial.Screens.InicioScreen
+import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
+import com.example.proyecto_movil_parcial.navigation.Screen
+import com.example.proyecto_movil_parcial.screens.DesResultadosScreen
+import com.example.proyecto_movil_parcial.screens.DesScreen
+import com.example.proyecto_movil_parcial.screens.DicScreen
+import com.example.proyecto_movil_parcial.screens.IntenScreen
+import com.example.proyecto_movil_parcial.screens.NuevPaScreen
+import com.example.proyecto_movil_parcial.screens.OracionDesScreen
+import com.example.proyecto_movil_parcial.screens.PerfScreen
+import com.example.proyecto_movil_parcial.screens.ResultaScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -27,8 +38,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
-import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
-import com.example.proyecto_movil_parcial.navigation.Screen
 import com.google.gson.Gson
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -116,25 +125,30 @@ fun MainNavigationScreen(
             composable(route = Screen.Inico.rout) {
                 InicioScreen(onNavigateToNewWord = { navController.navigate(Screen.NuevaPalabra.rout) })
             }
+
             composable(route = Screen.Diccionario.rout) {
                 DicScreen()
             }
-            composable(route = Screen.Desafíos.rout) {
+
+            composable(route = Screen.Desafios.rout) {
                 DesScreen(navController = navController)
             }
+
             composable(route = Screen.Perfil.rout) {
                 PerfScreen(userName = userName, onSignOut = onSignOut)
             }
+
             composable(route = Screen.NuevaPalabra.rout) {
                 NuevPaScreen(
                     onWordAdded = { palabra ->
-                        navController.navigate("intenta_adivinar/$palabra") {
+                        navController.navigate("${Screen.Intentar.rout}/$palabra") {
                             popUpTo(Screen.NuevaPalabra.rout) { inclusive = true }
                         }
                     },
                     onCancel = { navController.popBackStack() }
                 )
             }
+
             composable(
                 route = "${Screen.Intentar.rout}/{palabra}",
                 arguments = listOf(navArgument("palabra") { type = NavType.StringType })
@@ -151,6 +165,7 @@ fun MainNavigationScreen(
                     }
                 )
             }
+
             composable(
                 route = "resultado_screen/{palabra}/{esCorrecta}/{exerciseJson}",
                 arguments = listOf(
@@ -168,18 +183,21 @@ fun MainNavigationScreen(
                     exerciseJson = exerciseJson,
                     onAddToDictionary = {
                         navController.navigate(Screen.Diccionario.rout) {
-                            popUpTo(Screen.Inico.rout) { saveState = true }
+                            popUpTo(Screen.Inico.rout) {
+                                inclusive = true
+                            }
                             launchSingleTop = true
-                            restoreState = true
                         }
                     },
                     onBackToHome = {
                         navController.navigate(Screen.Inico.rout) {
-                            popUpTo(Screen.Inico.rout) { inclusive = true }
+                            popUpTo(Screen.Inico.rout) { inclusive = true
+                            }
                         }
                     }
                 )
             }
+
             composable(route = Screen.CrearOracion.rout) {
                 OracionDesScreen(
                     onNavigateToResult = { resultAsJson ->
@@ -190,6 +208,7 @@ fun MainNavigationScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+
             composable(
                 route = "${Screen.ResultadoOracion.rout}/{resultJson}",
                 arguments = listOf(navArgument("resultJson") { type = NavType.StringType })
@@ -198,8 +217,8 @@ fun MainNavigationScreen(
                 DesResultadosScreen(
                     resultJson = resultJson,
                     onFinish = {
-                        navController.navigate(Screen.Desafíos.rout) {
-                            popUpTo(Screen.Desafíos.rout) { inclusive = true }
+                        navController.navigate(Screen.Desafios.rout) {
+                            popUpTo(Screen.Desafios.rout) { inclusive = true }
                             launchSingleTop = true
                         }
                     }
@@ -211,8 +230,8 @@ fun MainNavigationScreen(
 
 @Preview
 @Composable
-fun MainNavigationPreview(){
+fun MainNavigationPreview() {
     MaterialTheme {
-        MainNavigationScreen("VANESA") { }
+        MainNavigationScreen("VANESA") {}
     }
 }

@@ -1,7 +1,7 @@
 package com.example.proyecto_movil_parcial.navigation
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -13,23 +13,25 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.proyecto_movil_parcial.R
 
 @Composable
 fun BottomNavigationBar(
     navController: NavController
 ) {
-    var selectedNavigationIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
+    // Obtener la ruta actual del NavController
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     val navigationItems = listOf(
         NavigationItem(
@@ -44,8 +46,8 @@ fun BottomNavigationBar(
         ),
         NavigationItem(
             title = "Desafíos",
-            icon = Icons.Default.Create,
-            route = Screen.Desafíos.rout
+            painter = painterResource(id = R.drawable.trofeo),
+            route = Screen.Desafios.rout
         ),
         NavigationItem(
             title = "Perfil",
@@ -54,15 +56,30 @@ fun BottomNavigationBar(
         )
     )
 
+    // Encontrar el índice actual basado en la ruta
+    val selectedIndex = navigationItems.indexOfFirst { it.route == currentRoute }
+        .takeIf { it >= 0 } ?: 0
+
     NavigationBar(
         containerColor = Color.White
     ) {
         navigationItems.forEachIndexed { index, item ->
             NavigationBarItem(
-                selected = selectedNavigationIndex == index,
+                selected = selectedIndex == index,
                 onClick = {
-                    selectedNavigationIndex = index
-                    navController.navigate(item.route)
+                    // Solo navegar si no estamos ya en esa pantalla
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            // Limpiar el back stack hasta el destino inicial
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            // Evitar múltiples copias de la misma pantalla
+                            launchSingleTop = true
+                            // Restaurar estado si existe
+                            restoreState = true
+                        }
+                    }
                 },
                 icon = {
                     if (item.icon != null) {
@@ -73,14 +90,15 @@ fun BottomNavigationBar(
                     } else if (item.painter != null) {
                         Icon(
                             painter = item.painter,
-                            contentDescription = item.title
+                            contentDescription = item.title,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 label = {
                     Text(
                         text = item.title,
-                        color = if (index == selectedNavigationIndex)
+                        color = if (index == selectedIndex)
                             Color.Black
                         else Color.Gray
                     )

@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +17,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,8 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import com.example.proyecto_movil_parcial.components.AddDocumentIcon
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
@@ -45,10 +41,10 @@ fun InicioScreen(
     val scope = rememberCoroutineScope()
     var maxPalabras by remember { mutableStateOf<Int?>(null) }
     var palabrasActuales by remember { mutableStateOf<List<String>>(emptyList()) }
+    var ejemploAleatorio by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var userName by remember { mutableStateOf("") }
 
-    // Cargar datos del usuario
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
@@ -69,6 +65,13 @@ fun InicioScreen(
                         try {
                             val palabras = FirebaseWordServiceProvider.service.getPalabrasAgregadas()
                             palabrasActuales = palabras.map { it.palabra }
+
+                            if (palabras.isNotEmpty()) {
+                                val palabraAleatoria = palabras.random()
+                                if (palabraAleatoria.examples.isNotEmpty()) {
+                                    ejemploAleatorio = palabraAleatoria.examples.random()
+                                }
+                            }
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error al cargar palabras", Toast.LENGTH_SHORT).show()
                         } finally {
@@ -98,69 +101,8 @@ fun InicioScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Estado actual de palabras
-            if (!isLoading && maxPalabras != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Tus palabras:",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
-                                Text(
-                                    text = "${palabrasActuales.size} / $maxPalabras",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                            val progress = if (maxPalabras!! > 0) palabrasActuales.size.toFloat() / maxPalabras!! else 0f
-                            val colorIndicador = when {
-                                palabrasActuales.size >= maxPalabras!! -> Color(0xFFF44336)
-                                progress >= 0.8f -> Color(0xFFFF9800)
-                                else -> Color(0xFF4CAF50)
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = colorIndicador.copy(alpha = 0.2f),
-                                        shape = androidx.compose.foundation.shape.CircleShape
-                                    )
-                                    .padding(12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = when {
-                                        palabrasActuales.size >= maxPalabras!! -> "🔴"
-                                        progress >= 0.8f -> "🟡"
-                                        else -> "🟢"
-                                    },
-                                    fontSize = 20.sp
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Sección principal
             Text(
-                text = "Tus palabras en frase",
+                text = "Oraciones",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -195,24 +137,26 @@ fun InicioScreen(
                             fontWeight = FontWeight.Medium
                         )
 
-                        Text(
-                            text = "¡Usa el botón 'Nueva palabra' para empezar!",
-                            textAlign = TextAlign.Center,
-                            color = Color.Gray,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
                     }
                 } else {
-                    LazyColumn(
+                    Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        items(palabrasActuales) { palabra ->
+                        if (ejemploAleatorio.isNotEmpty()) {
                             Text(
-                                text = "• ${palabra.replaceFirstChar { it.uppercase() }}",
+                                text = "\"$ejemploAleatorio\"",
                                 fontSize = 14.sp,
                                 color = Color.DarkGray,
-                                modifier = Modifier.padding(vertical = 2.dp)
+                                textAlign = TextAlign.Center,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "Cargando ejemplo...",
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -282,7 +226,7 @@ fun InicioScreen(
                 when {
                     restantes == 0 -> {
                         Text(
-                            text = "⚠️ Has alcanzado tu límite de $maxPalabras palabras. Ve al perfil para aumentarlo.",
+                            text = "Has alcanzado tu límite de $maxPalabras palabras. Ve al perfil para aumentarlo.",
                             fontSize = 12.sp,
                             color = Color(0xFFF44336),
                             textAlign = TextAlign.Center,
@@ -291,7 +235,7 @@ fun InicioScreen(
                     }
                     restantes <= 2 -> {
                         Text(
-                            text = "⚡ Te quedan $restantes palabras por agregar",
+                            text = "Te quedan $restantes palabras por agregar",
                             fontSize = 12.sp,
                             color = Color(0xFFFF9800),
                             textAlign = TextAlign.Center,

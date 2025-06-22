@@ -1,4 +1,4 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -103,7 +103,7 @@ fun NuevPaScreen(
                     if (isLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
                     } else {
-                        Text(text = "Agregar", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(text = "Buscar", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                 }
             }

@@ -1,13 +1,22 @@
-package com.example.proyecto_movil_parcial.Screens
+package com.example.proyecto_movil_parcial.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.OracionDesResult
@@ -29,6 +38,7 @@ fun DesResultadosScreen(
 
     Column(Modifier.fillMaxSize()) {
         HearderInicio(title = "Crea Oraciones")
+
         if (result != null) {
             Column(
                 modifier = Modifier
@@ -41,6 +51,7 @@ fun DesResultadosScreen(
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text("Your Sentence:", style = MaterialTheme.typography.titleMedium)
@@ -49,7 +60,8 @@ fun DesResultadosScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Divider()
+
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ResultSection(title = "Revisión AI", content = result.revisionAI)
@@ -57,6 +69,7 @@ fun DesResultadosScreen(
                 ResultSection(title = "Tu Oración con un Pequeño Ajuste", content = result.oracionAjustada)
 
                 Spacer(modifier = Modifier.weight(1f))
+
                 Button(
                     onClick = onFinish,
                     modifier = Modifier
@@ -80,5 +93,16 @@ private fun ResultSection(title: String, content: String) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(text = content, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Preview
+@Composable
+private fun DesResultadosScreenPreview() {
+    MaterialTheme {
+        DesResultadosScreen(
+            resultJson = null,
+            onFinish = {}
+        )
     }
 }
