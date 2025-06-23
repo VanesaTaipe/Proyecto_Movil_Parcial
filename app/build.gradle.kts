@@ -69,32 +69,49 @@ android {
 }
 
 dependencies {
+
+    // --- Core de Android y Jetpack ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2") // Para StateFlow y viewModelScope
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
+
+    // --- Jetpack Compose UI ---
+    implementation(platform(libs.androidx.compose.bom)) // BOM para Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    // --- Firebase y autenticación ---
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0")) // BOM de Firebase
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.firebase.auth)
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    // --- Networking (Retrofit + Gson) ---
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // --- Corrutinas ---
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // --- Pruebas unitarias ---
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("app.cash.turbine:turbine:1.0.0") // Para testear flows
+    testImplementation("io.mockk:mockk:1.13.10") // (recomendado agregar si haces tests unitarios puros con mockk)
+
+    // --- Pruebas instrumentadas (Android) ---
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation("io.mockk:mockk-android:1.13") // Mocking en AndroidTest
+
+    // --- Debug y herramientas de testing UI ---
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // pruebas de instrumentacion
-    androidTestImplementation("io.mockk:mockk-android:1.13.5")
-//    androidTestImplementation("io.mockk:mockk-android-inline:1.13.5")
 }
