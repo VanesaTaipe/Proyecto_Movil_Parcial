@@ -98,3 +98,5 @@ enabled = !isLoading &&
 
    Verifica que el botón realmente ejecutó el callback con el número correcto
 
+### Output
+![PresentationScreenTest.png](PresentationScreenTest.png)
