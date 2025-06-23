@@ -54,6 +54,18 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+         resources {
+             excludes += "META-INF/LICENSE.md" // Nota la ausencia de la barra inicial
+             excludes += "META-INF/LICENSE-notice.md"
+             excludes += "META-INF/LICENSE"
+             excludes += "META-INF/NOTICE.md"
+             excludes += "META-INF/NOTICE"
+             excludes += "META-INF/DEPENDENCIES"
+             excludes += "META-INF/AL2.0"
+             excludes += "META-INF/LGPL2.1"
+         }
+    }
 }
 
 dependencies {
@@ -81,4 +93,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // pruebas de instrumentacion
+    androidTestImplementation("io.mockk:mockk-android:1.13.5")
+//    androidTestImplementation("io.mockk:mockk-android-inline:1.13.5")
 }
