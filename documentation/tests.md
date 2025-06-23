@@ -100,3 +100,106 @@ enabled = !isLoading &&
 
 ### Output
 ![PresentationScreenTest.png](PresentationScreenTest.png)
+
+
+## LoadingActivity & LoadingScreenTest
+La `LoadingActivity` sirve como pantalla de entrada (splash lógica) para tu app. Su función es:
+
+1. Verifica si el usuario está logueado con Firebase.
+2. Si está logueado, consulta Firestore para ver si ya configuró su perfil.
+3. Según los datos recibidos, redirige a:
+   * 🟣 MainActivity: si el usuario ya configuró su número de palabras diario (maxPalabrasDia > 0).
+   * 🟡 PresentationActivity: si aún no configuró el número de palabras.
+   * 🔴 SignInActivity: si no hay sesión o ocurre un error.
+
+En la imagen hacemos la simulacion de que se muestre el splash. Revisar code -> [LoadingScreenTest](app/src/androidTest/java/com/example/proyecto_movil_parcial/LoadingScreenTest.kt)
+
+![LoginScreenTest.png](LoginScreenTest.png)
+
+> No obstante para evaluar su correcto funcionamiento aislamos la logica con la interfaz para hacer pruebas unitarias
+
+### Propuesta de aislamiento
+
+Refactorizamos para testear `checkUserStatus()`. Esto implica separar la lógica de redirección/autenticación fuera de 
+`Activity` y llevarla a un ViewModel para poder testearla unitariamente.
+
+* Para ello la logica extraida la encontramos: `UserStatusViewModel.kt` – [ViewModel testable](app/src/main/java/com/example/proyecto_movil_parcial/viewmodel/UserStatusViewModel.kt)
+
+#### Objetivo
+* testear `UserStatusViewModel` de forma aislada.
+* no se necesita lanzar la app ni usar dispositivos/emuladores
+* simular respuestas de Firestore y FirebaseAuth.
+
+Esta logica de pruebas la descargamos en la siguiente prueba `UserStatusViewModelTest`
+
+### Dependencias
+
+Se agregan las siguientes dependencias a nivel app en `build.gradle.kt`
+
+```declarative
+testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+testImplementation("app.cash.turbine:turbine:1.0.0") // compatible con kotlinx.coroutines
+// Revisar tener mockk
+// testImplementation("io.mockk:mockk:1.13.10") 
+
+// como usamos viewmodel es importante para que funcione StateFlow
+implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+
+```
+
+### Importacion de librerias o packetes 
+
+Explicamos como y en donde ejecutamos las librerias dentro del codigo 
+
+```kotlin
+// capturar con slot<OnSuccessListener<DocumentSnapshot>> y llamarla con onSuccess(...)
+import com.google.android.gms.tasks.OnSuccessListener
+
+// Aplicamos un slot
+val successSlot = slot<OnSuccessListener<DocumentSnapshot>>()
+
+// Captura el listener y simula el éxito
+every { docRef.addOnSuccessListener(capture(successSlot)) } answers {
+   successSlot.captured.onSuccess(mockDocument)
+   docRef
+}
+
+```
+
+### UserStatusViewModelTest
+#### Objetivo
+Validar la lógica de negocio del UserStatusViewModel de forma aislada, sin requerir una ejecución real del backend ni Firebase.
+
+#### Funciones
+1. **user not logged in emits NotLoggedIn**
+   * Cuando `FirebaseAuth.currentUser` es `null`, el ViewModel debe emitir `UserStatus.NotLoggedIn`
+   * Asegura que tu app no intente seguir flujos protegidos sin autenticación.
+2. **logged in but no document emits NeedsSetup**
+   Si el usuario existe pero no hay un documento en Firestore, se emite `UserStatus.NeedsSetup`.
+   Garantiza que la app redirija correctamente a la pantalla de configuración si el usuario no tiene datos guardados aún (como `maxPalabrasDia`).
+
+3. **logged in with valid maxPalabrasDia emits Ready**
+   * Valida el camino feliz del flujo: el usuario está autenticado y ya configurado correctamente.
+   * La app debe llevarlo directo al inicio (`MainActivity`)
+   * Si esta prueba falla, lleva al usuario ya configurado a la pantalla incorrecta.
+
+4. **logged in with document missing maxPalabrasDia emits NeedsSetup**
+   * Representa un caso muy real: el usuario se registró pero no completó el onboarding en el doc de firebase.
+   * Si falla, el usuario queda "colgado" sin saber qué hacer, o la app puede fallar por intentar usar `null`
+   
+   | 🧾 Estado del usuario              | ¿Es válido? | ¿Qué pasa si no lo manejamos?                 |
+   | ---------------------------------- | ----------- |-----------------------------------------------|
+   | Autenticado pero sin Firestore doc | ❌           | La app no sabe qué hacer. Podría fallar.      |
+   | Tiene doc pero falta campo clave   | ❌           | App podría crashear al usar `!!` sobre `null`. |
+   | Tiene doc + campos válidos         | ✅           | Todo funciona normal                          |
+
+
+5. **logged in but firestore fails emits Retry**
+   * Simula una falla en Firestore (sin internet, error interno, etc.)
+   * Verifica que el ViewModel reacciona con un estado de reintento o notificación, en lugar de crashear. Mejora la resiliencia del app
+
+#### Output
+
+El resultado esperado es que se pueda pasar las 5 pruebas y asi fue!
+
+![UserStatusViewModelTest.png](UserStatusViewModelTest.png)
