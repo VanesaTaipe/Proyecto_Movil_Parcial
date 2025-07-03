@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -169,7 +170,7 @@ fun GoogleSignInButton(
             .height(56.dp),
         shape = RoundedCornerShape(28.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White
+            containerColor = Color(0xFFE67431)
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 2.dp
@@ -182,14 +183,14 @@ fun GoogleSignInButton(
             Image(
                 painter = painterResource(id = R.drawable.google),
                 contentDescription = "Google Logo",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(28.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = "Iniciar sesión con Google",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -200,7 +201,7 @@ fun GoogleSignInButton(
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun SimpleGoogleLoginPreview() {
-    MaterialTheme {
+    Proyecto_Movil_parcialTheme {
         SimpleGoogleLoginScreen(onGoogleLoginClick = {})
     }
 }

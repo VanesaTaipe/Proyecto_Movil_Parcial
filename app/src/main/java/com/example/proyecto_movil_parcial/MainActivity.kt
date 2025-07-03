@@ -20,7 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.proyecto_movil_parcial.Screens.InicioScreen
+import com.example.proyecto_movil_parcial.screens.InicioScreen
 import com.example.proyecto_movil_parcial.navigation.BottomNavigationBar
 import com.example.proyecto_movil_parcial.navigation.Screen
 import com.example.proyecto_movil_parcial.screens.DesResultadosScreen
@@ -31,6 +31,7 @@ import com.example.proyecto_movil_parcial.screens.NuevPaScreen
 import com.example.proyecto_movil_parcial.screens.OracionDesScreen
 import com.example.proyecto_movil_parcial.screens.PerfScreen
 import com.example.proyecto_movil_parcial.screens.ResultaScreen
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -66,7 +67,8 @@ class MainActivity : ComponentActivity() {
         val userName = user?.displayName ?: "Usuario"
 
         setContent {
-            MaterialTheme {
+
+            Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -231,7 +233,7 @@ fun MainNavigationScreen(
 @Preview
 @Composable
 fun MainNavigationPreview() {
-    MaterialTheme {
+   Proyecto_Movil_parcialTheme {
         MainNavigationScreen("VANESA") {}
     }
 }

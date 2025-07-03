@@ -12,10 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -31,7 +31,7 @@ class LoadingActivity : ComponentActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         setContent {
-            MaterialTheme {
+            Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -152,7 +152,7 @@ fun LoadingScreen() {
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(64.dp),
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.background
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -175,7 +175,7 @@ fun LoadingScreen() {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    MaterialTheme {
-        LoadingScreen()
+       Proyecto_Movil_parcialTheme {
+            LoadingScreen()
+        }
     }
-}

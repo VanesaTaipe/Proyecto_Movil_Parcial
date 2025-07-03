@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.PalabraAgregada
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 
 @Composable
 fun PalabraDetalleScreen(
@@ -48,7 +49,7 @@ fun PalabraDetalleScreen(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (selectedTab == index)
-                                Color(0xFF8DB4A6)
+                                Color(0xFFFAE0A8)
                             else
                                 Color.LightGray
                         ),
@@ -56,8 +57,8 @@ fun PalabraDetalleScreen(
                     ) {
                         Text(
                             text = tab,
-                            fontSize = 14.sp,
-                            color = if (selectedTab == index) Color.White else Color.Gray,
+                            fontSize = 12.sp,
+                            color = if (selectedTab == index) Color.Black else Color.Gray,
                             fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
                         )
                     }
@@ -206,7 +207,7 @@ fun ExamplesSection(palabra: PalabraAgregada) {
                     Box(
                         modifier = Modifier
                             .background(
-                                color = Color(0xFF8DB4A6),
+                                color = Color(0xFFFAE0A8),
                                 shape = androidx.compose.foundation.shape.CircleShape
                             )
                             .size(24.dp),
@@ -253,8 +254,8 @@ fun PalabraDetalleScreenPreview() {
             "It was beautiful to see how happy the children were."
         )
     )
+    Proyecto_Movil_parcialTheme{
+            PalabraDetalleScreen(palabra = samplePalabra)
 
-    MaterialTheme {
-        PalabraDetalleScreen(palabra = samplePalabra)
     }
 }

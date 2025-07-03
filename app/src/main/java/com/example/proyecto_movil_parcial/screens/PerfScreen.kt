@@ -38,7 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -94,20 +96,13 @@ fun PerfScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Perfil",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        HearderInicio(title = "Perfil")
 
         Text(
             text = userName,
             style = MaterialTheme.typography.titleMedium,
-            color = Color.Gray,
+            color = Color.Black,
             modifier = Modifier.padding(bottom = 32.dp)
         )
         Card(
@@ -116,7 +111,7 @@ fun PerfScreen(
                 .padding(bottom = 24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Column(
@@ -151,7 +146,7 @@ fun PerfScreen(
                                 text = "${maxPalabrasDia ?: "No configurado"}",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = Color.Black
                             )
                         }
                     }
@@ -210,18 +205,18 @@ fun PerfScreen(
 
 
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(150.dp))
 
         Button(
             onClick = onSignOut,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = "Cerrar Sesión",
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -356,7 +351,7 @@ fun EditMaxPalabrasDialog(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFCEA3D9)
+                            containerColor = Color(0xFFFAE0A8)
                         ),
                         enabled = !isUpdating && palabrasText.isNotEmpty() &&
                                 palabrasText.toIntOrNull() != null &&
@@ -386,7 +381,7 @@ fun EditMaxPalabrasDialog(
 )
 @Composable
 fun PerfScreenPreview() {
-    MaterialTheme {
+    Proyecto_Movil_parcialTheme {
         PerfScreen(
             userName = "Hola, Usuario",
             onSignOut = {}

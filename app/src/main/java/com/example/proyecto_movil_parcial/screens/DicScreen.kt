@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
 import com.example.proyecto_movil_parcial.services.PalabraAgregada
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,7 +73,7 @@ fun DicScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
                         text = "Cargando palabras...",
@@ -91,11 +92,7 @@ fun DicScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(32.dp)
                 ) {
-                    Text(
-                        text = "📚",
-                        fontSize = 48.sp,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+
                     Text(
                         text = "No tienes palabras guardadas",
                         fontSize = 18.sp,
@@ -165,7 +162,7 @@ fun PalabraItemSimple(
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.secondary
         )
     ) {
         Row(
@@ -183,7 +180,7 @@ fun PalabraItemSimple(
                     text = palabra.palabra.replaceFirstChar { it.uppercase() },
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black
                 )
 
                 Text(
@@ -229,7 +226,7 @@ private fun formatearFecha(timestamp: com.google.firebase.Timestamp): String {
 )
 @Composable
 fun DiccionarioPreview() {
-    MaterialTheme {
+    Proyecto_Movil_parcialTheme {
         DicScreen()
     }
 }
