@@ -145,7 +145,7 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Define cuantas palabras al día te gustaría aprender",
+                    text = "Define cuantas palabras te gustaría aprender",
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Center,

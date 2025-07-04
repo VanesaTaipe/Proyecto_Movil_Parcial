@@ -228,5 +228,6 @@ private fun formatearFecha(timestamp: com.google.firebase.Timestamp): String {
 fun DiccionarioPreview() {
     Proyecto_Movil_parcialTheme {
         DicScreen()
+
     }
 }

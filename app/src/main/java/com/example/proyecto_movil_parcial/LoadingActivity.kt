@@ -7,10 +7,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +36,7 @@ class LoadingActivity : ComponentActivity() {
             Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.secondary
                 ) {
                     LoadingScreen()
                 }
@@ -152,14 +154,16 @@ fun LoadingScreen() {
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(64.dp),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "logo"
+            painter = painterResource(id = R.drawable.logo1),
+            contentDescription = "logo",
+            modifier = Modifier
+                .clip(CircleShape)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

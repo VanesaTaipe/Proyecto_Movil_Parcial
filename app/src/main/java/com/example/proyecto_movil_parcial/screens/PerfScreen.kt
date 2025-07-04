@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -58,6 +59,7 @@ fun PerfScreen(
     var isLoading by remember { mutableStateOf(true) }
     var showEditDialog by remember { mutableStateOf(false) }
     var isUpdating by remember { mutableStateOf(false) }
+    val cleanUserName = userName.removePrefix("Hola, ")
 
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
@@ -99,12 +101,26 @@ fun PerfScreen(
     ) {
         HearderInicio(title = "Perfil")
 
-        Text(
-            text = userName,
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Usuario",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(
+                text = cleanUserName,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Black
+            )
+        }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,8 +173,8 @@ fun PerfScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar palabras diarias",
-                            tint = MaterialTheme.colorScheme.primary
+                            contentDescription = "Editar palabras",
+                            tint = MaterialTheme.colorScheme.background
                         )
                     }
                 }
@@ -284,7 +300,7 @@ fun EditMaxPalabrasDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Editar Palabras Diarias",
+                    text = "Editar Palabras",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -300,7 +316,7 @@ fun EditMaxPalabrasDialog(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = "¿Cuántas palabras te gustaría aprender por día?",
+                        text = "¿Cuántas palabras te gustaría aprender en total?",
                         fontSize = 14.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Center,

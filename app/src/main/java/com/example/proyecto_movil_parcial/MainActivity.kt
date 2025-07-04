@@ -233,7 +233,10 @@ fun MainNavigationScreen(
 @Preview
 @Composable
 fun MainNavigationPreview() {
-   Proyecto_Movil_parcialTheme {
-        MainNavigationScreen("VANESA") {}
+    Proyecto_Movil_parcialTheme {
+        MainNavigationScreen(
+            userName = "VANESA",
+            onSignOut = {}
+        )
     }
 }
