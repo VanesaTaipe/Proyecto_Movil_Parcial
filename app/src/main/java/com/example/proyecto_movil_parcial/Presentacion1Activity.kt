@@ -28,6 +28,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -116,6 +117,9 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
     var palabrasText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
+    // Límite máximo de palabras por día
+    val maxLimit = 50
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -166,7 +170,9 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 48.dp),
+                    .padding(horizontal = 48.dp)
+                    // identificador localizar elementos en test incluso si cambia el texto en la ui
+                    .testTag("input_npalabras"),
                 placeholder = { Text("Escribe un número") },
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true,
@@ -184,17 +190,24 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
                 Button(
                     onClick = {
                         val maxPalabras = palabrasText.toIntOrNull()
-                        if (maxPalabras != null && maxPalabras > 0) {
+                        // el limite de palabras es 50
+                        if (maxPalabras != null && maxPalabras in 1..maxLimit) {
                             isLoading = true
                             onNext(maxPalabras)
                         }
                     },
-                    modifier = Modifier.width(120.dp),
+                    modifier = Modifier
+                        .width(120.dp)
+                        .testTag("btn_siguiente"),
                     colors = ButtonDefaults.buttonColors(
                         containerColor =MaterialTheme.colorScheme.secondary
                     ),
                     shape = RoundedCornerShape(24.dp),
-                    enabled = !isLoading && palabrasText.isNotEmpty() && palabrasText.toIntOrNull() != null && palabrasText.toInt() > 0
+                    enabled = !isLoading &&
+                            palabrasText.isNotEmpty() &&
+                            palabrasText.toIntOrNull() != null &&
+                            // lo limitamos a solo 50 palabras diarias
+                            palabrasText.toInt() in 1..50
                 ) {
                     if (isLoading) {
                         Text(

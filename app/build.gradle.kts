@@ -54,31 +54,64 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+         resources {
+             excludes += "META-INF/LICENSE.md" // Nota la ausencia de la barra inicial
+             excludes += "META-INF/LICENSE-notice.md"
+             excludes += "META-INF/LICENSE"
+             excludes += "META-INF/NOTICE.md"
+             excludes += "META-INF/NOTICE"
+             excludes += "META-INF/DEPENDENCIES"
+             excludes += "META-INF/AL2.0"
+             excludes += "META-INF/LGPL2.1"
+         }
+    }
 }
 
 dependencies {
+
+    // --- Core de Android y Jetpack ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2") // Para StateFlow y viewModelScope
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
+
+    // --- Jetpack Compose UI ---
+    implementation(platform(libs.androidx.compose.bom)) // BOM para Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.navigation:navigation-compose:2.8.5")
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.firebase.auth)
-    implementation("androidx.navigation:navigation-compose:2.9.0")
+    // --- Networking (Retrofit + Gson) ---
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // --- Corrutinas ---
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // --- Pruebas unitarias ---
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("app.cash.turbine:turbine:1.0.0") // Para testear flows
+    testImplementation("io.mockk:mockk:1.13.10") // (recomendado agregar si haces tests unitarios puros con mockk)
+
+    // --- Pruebas instrumentadas (Android) ---
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+//    androidTestImplementation("io.mockk:mockk-android") // Mocking en AndroidTest
+    testImplementation("io.mockk:mockk:1.13.16")
+
+    // --- Debug y herramientas de testing UI ---
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
