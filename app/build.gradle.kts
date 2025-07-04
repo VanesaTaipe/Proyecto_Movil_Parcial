@@ -109,9 +109,12 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation("io.mockk:mockk-android:1.13") // Mocking en AndroidTest
+
+//    androidTestImplementation("io.mockk:mockk-android") // Mocking en AndroidTest
+    testImplementation("io.mockk:mockk:1.13.16")
 
     // --- Debug y herramientas de testing UI ---
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }

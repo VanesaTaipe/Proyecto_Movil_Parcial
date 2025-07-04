@@ -167,6 +167,8 @@ every { docRef.addOnSuccessListener(capture(successSlot)) } answers {
 ```
 
 ### UserStatusViewModelTest
+
+> Ruta del documento: [UserStatusViewModelTest]{app/src/test/java/com/example/proyecto_movil_parcial/UserStatusViewModelTest.kt}
 #### Objetivo
 Validar la lógica de negocio del UserStatusViewModel de forma aislada, sin requerir una ejecución real del backend ni Firebase.
 
@@ -203,3 +205,54 @@ Validar la lógica de negocio del UserStatusViewModel de forma aislada, sin requ
 El resultado esperado es que se pueda pasar las 5 pruebas y asi fue!
 
 ![UserStatusViewModelTest.png](UserStatusViewModelTest.png)
+
+> Pruebade isntrumentalización
+
+## Nueva Palabra Screen
+
+> Directorio del test de [NuevaPaScreenTest]{app/src/androidTest/java/com/example/proyecto_movil_parcial/NuevaPaScreenTest.kt}
+
+El objetivo es probar que funcione:
+* Entrada de texto para nueva palabra
+* Boton de buscar
+* entradas validas solo texto, espacio y apostrofe 
+
+para ello debe cumplir escenarios en los que **No Permita:**
+* Copy paste con caracteres no permitidos
+* numeros
+* simbolos diferentes al apostrofe
+
+en tal sentido se crea unfuncion para cada uno de los escenarios mencionados.
+
+```kotlin
+/**
+ *  ejemplifica un copy-paste
+     * Verifica que el campo de texto solo acepte letras, espacios y apóstrofes.
+     */
+    @Test
+    fun textoConCaracteresInvalidosNoSeAcepta() {}
+    
+    // letra por letra, entrada manual*
+    @Test
+    fun aceptaSoloCaracteresValidosCuandoSeEscribeLetraPorLetra() {}
+
+    // boton de buscar deshabilitado con un campo vacio
+   @Test
+   fun botonBuscarDeshabilitadoConCampoVacio() {}
+
+```
+
+### Output
+
+![NuevaPaScreenTest.png](NuevaPaScreenTest.png)
+
+
+## DicScreen
+
+> Link [DicScreenTest]{app/src/androidTest/java/com/example/proyecto_movil_parcial/DicScreenTest.kt}
+
+para las caracteristicas de DicScreen el acoplamiento no me permite hacer pruebas mas realistas y mas variadas que por el momento solo con palabras vacias
+
+el output obtenido de al unica prueba es
+
+![DicScreenTest.png](DicScreenTest.png)

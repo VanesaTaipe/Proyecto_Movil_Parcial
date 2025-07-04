@@ -12,4 +12,4 @@ Importante que el entorno se ejecute con java 17 menores no admite
 detalle de las dependenccias
 
 * Detalle de los [tests](documentation/tests.md)
-
+* Test instrumentalizados 
