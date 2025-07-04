@@ -11,9 +11,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.*
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
@@ -123,7 +125,7 @@ fun OracionDesScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCEA3D9)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     enabled = !isVerifying
                 ) {
                     if (isVerifying) {
@@ -134,5 +136,17 @@ fun OracionDesScreen(
                 }
             }
         }
+    }
+}
+@Preview
+@Composable
+fun OracionDesScreenPreview() {
+    Proyecto_Movil_parcialTheme() {
+        OracionDesScreen(
+            onNavigateToResult = { result ->
+            },
+            onNavigateBack = {
+            }
+        )
     }
 }

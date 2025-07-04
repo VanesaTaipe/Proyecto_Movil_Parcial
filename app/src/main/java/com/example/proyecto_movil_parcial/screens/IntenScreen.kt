@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
 import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,7 +63,7 @@ fun IntenScreen(
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -73,7 +74,7 @@ fun IntenScreen(
                         text = palabra.replaceFirstChar { it.uppercase() },
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = Color.Black
                     )
                 }
             }
@@ -97,7 +98,10 @@ fun IntenScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3CD))
                 ) {
-                    Text(text = "⚠️ $message", modifier = Modifier.padding(12.dp), fontSize = 12.sp, color = Color(0xFF856404))
+                    Text(text = "⚠️ $message", modifier = Modifier.padding(12.dp), fontSize = 12.sp, color = Color(
+                        0xFFFFBA7C
+                    )
+                    )
                 }
             }
             if (isLoadingExercise) {
@@ -129,7 +133,7 @@ fun IntenScreen(
                 modifier = Modifier
                     .width(120.dp)
                     .align(Alignment.End),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCEA3D9)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF3BE98)),
                 shape = RoundedCornerShape(24.dp),
                 enabled = !isLoading && !isLoadingExercise && selectedOption != -1
             ) {
@@ -173,7 +177,8 @@ fun OpcionItem(
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun IntenScreenPreview() {
-    MaterialTheme {
-        IntenScreen(palabra = "ephemeral", onResult = { _, _ -> })
-    }
+    Proyecto_Movil_parcialTheme {
+
+            IntenScreen(palabra = "ephemeral", onResult = { _, _ -> })
+        }
 }

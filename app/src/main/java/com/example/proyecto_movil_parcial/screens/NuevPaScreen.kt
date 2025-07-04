@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +126,7 @@ fun NuevPaScreen(
                         }
                     },
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCEA3D9)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     shape = RoundedCornerShape(24.dp),
                     enabled = !isLoading && palabraText.isNotBlank() // Desactiva si está vacío o cargando.
                 ) {
@@ -154,7 +155,8 @@ fun NuevPaScreen(
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun NuevPaScreenPreview() {
-    MaterialTheme {
-        NuevPaScreen()
-    }
+
+    Proyecto_Movil_parcialTheme {
+           NuevPaScreen()
+       }
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_movil_parcial.navigation.Screen
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 
 @Composable
 fun DesScreen(navController: NavController){
@@ -37,7 +38,8 @@ fun DesScreen(navController: NavController){
 @Preview(showBackground = true)
 @Composable
 fun DesScreenPreview() {
-    MaterialTheme {
-        DesScreen(navController = rememberNavController())
+    Proyecto_Movil_parcialTheme {
+
+            DesScreen(navController = rememberNavController())
+        }
     }
-}

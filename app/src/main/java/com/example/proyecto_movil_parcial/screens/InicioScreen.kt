@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.AddDocumentIcon
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -113,7 +114,7 @@ fun InicioScreen(
                     .fillMaxWidth()
                     .height(200.dp)
                     .background(
-                        Color.LightGray,
+                        MaterialTheme.colorScheme.secondary,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .padding(16.dp),
@@ -123,7 +124,7 @@ fun InicioScreen(
                     Text(
                         text = "Cargando...",
                         textAlign = TextAlign.Center,
-                        color = Color.DarkGray
+                        color = Color.Black
                     )
                 } else if (palabrasActuales.isEmpty()) {
                     Column(
@@ -132,7 +133,7 @@ fun InicioScreen(
                         Text(
                             text = "aún no tienes palabras nuevas buscadas",
                             textAlign = TextAlign.Center,
-                            color = Color.DarkGray,
+                            color = Color.Black,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -145,8 +146,8 @@ fun InicioScreen(
                         if (ejemploAleatorio.isNotEmpty()) {
                             Text(
                                 text = "\"$ejemploAleatorio\"",
-                                fontSize = 14.sp,
-                                color = Color.DarkGray,
+                                fontSize = 20.sp,
+                                color = Color.Black,
                                 textAlign = TextAlign.Center,
                                 lineHeight = 20.sp,
                                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -155,7 +156,7 @@ fun InicioScreen(
                             Text(
                                 text = "Cargando ejemplo...",
                                 fontSize = 14.sp,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -165,9 +166,9 @@ fun InicioScreen(
 
             Text(
                 text = "Nueva palabra",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Gray,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
                 modifier = Modifier.padding(top = 16.dp)
             )
 
@@ -186,7 +187,7 @@ fun InicioScreen(
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = if (puedeAgregarPalabra)
-                        Color(0xFFEBDABF)
+                        MaterialTheme.colorScheme.secondary
                     else
                         Color(0xFFE0E0E0)
                 ),
@@ -199,8 +200,8 @@ fun InicioScreen(
                 ) {
                     if (puedeAgregarPalabra) {
                         AddDocumentIcon(
-                            modifier = Modifier.size(64.dp),
-                            color = Color(0xFF8B7355)
+                            modifier = Modifier.size(100.dp),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     } else {
                         Column(
@@ -254,7 +255,7 @@ fun InicioScreen(
 )
 @Composable
 fun InicioScreenPreview() {
-    MaterialTheme {
+    Proyecto_Movil_parcialTheme {
         InicioScreen()
     }
 }

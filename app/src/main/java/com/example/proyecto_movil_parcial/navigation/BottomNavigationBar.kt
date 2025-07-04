@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_movil_parcial.R
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 
 @Composable
 fun BottomNavigationBar(
@@ -61,8 +62,7 @@ fun BottomNavigationBar(
         .takeIf { it >= 0 } ?: 0
 
     NavigationBar(
-        containerColor = Color.White
-    ) {
+        containerColor = MaterialTheme.colorScheme.onSecondary) {
         navigationItems.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedIndex == index,
@@ -95,18 +95,21 @@ fun BottomNavigationBar(
                         )
                     }
                 },
-                label = {
+                 label = {
                     Text(
                         text = item.title,
-                        color = if (index == selectedIndex)
-                            Color.Black
-                        else Color.Gray
+                        style = MaterialTheme.typography.labelSmall
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = Color.Gray,
-                    indicatorColor = MaterialTheme.colorScheme.onSecondary
+
+                    selectedIconColor = Color(0xFFE67431),
+                    selectedTextColor = Color(0xFFE67431),
+
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+
+                    indicatorColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -123,7 +126,11 @@ data class NavigationItem(
 @Preview
 @Composable
 fun BottomNavigationBarPreview() {
-    MaterialTheme {
-        BottomNavigationBar(navController = rememberNavController())
+    Proyecto_Movil_parcialTheme {
+
+            BottomNavigationBar(navController = rememberNavController())
     }
+
 }
+
+

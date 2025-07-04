@@ -34,6 +34,7 @@ import com.example.proyecto_movil_parcial.screens.NuevPaScreen
 import com.example.proyecto_movil_parcial.screens.OracionDesScreen
 import com.example.proyecto_movil_parcial.screens.PerfScreen
 import com.example.proyecto_movil_parcial.screens.ResultaScreen
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -77,7 +78,8 @@ class MainActivity : ComponentActivity() {
 
         // Renderizado de la interfaz de usuario principal usando Jetpack Compose.
         setContent {
-            MaterialTheme {
+
+            Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -260,7 +262,10 @@ fun MainNavigationScreen(
 @Preview
 @Composable
 fun MainNavigationPreview() {
-    MaterialTheme {
-        MainNavigationScreen("VANESA") {}
+    Proyecto_Movil_parcialTheme {
+        MainNavigationScreen(
+            userName = "VANESA",
+            onSignOut = {}
+        )
     }
 }

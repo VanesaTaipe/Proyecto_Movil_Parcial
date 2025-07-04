@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HeaderSection
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -51,7 +52,7 @@ class PresentationActivity : ComponentActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         setContent {
-            MaterialTheme {
+            Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -142,13 +143,13 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Color(0xFFEBDABF),
+                        color = Color(0xFFFFEDB5),
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Define cuantas palabras al día te gustaría aprender",
+                    text = "Define cuantas palabras te gustaría aprender",
                     fontSize = 16.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Center,
@@ -199,7 +200,7 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
                         .width(120.dp)
                         .testTag("btn_siguiente"),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFCEA3D9)  // Color morado claro
+                        containerColor =MaterialTheme.colorScheme.secondary
                     ),
                     shape = RoundedCornerShape(24.dp),
                     enabled = !isLoading &&
@@ -232,7 +233,7 @@ fun FirstPresentationScreen(onNext: (Int) -> Unit) {
 )
 @Composable
 fun FirstPresentationScreenPreview() {
-    MaterialTheme {
+    Proyecto_Movil_parcialTheme {
         FirstPresentationScreen(onNext = {})
     }
 }

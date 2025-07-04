@@ -7,16 +7,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+// import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -39,7 +40,7 @@ class LoadingActivity : ComponentActivity() {
 
         // Renderización de UI utilizando Jetpack Compose con el tema Material Design 3.
         setContent {
-            MaterialTheme {
+            Proyecto_Movil_parcialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(), // Establece la superficie para cubrir toda la pantalla.
                     color = MaterialTheme.colorScheme.background // Utiliza el color de fondo del tema definido.
@@ -196,8 +197,10 @@ fun LoadingScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "logo"
+            painter = painterResource(id = R.drawable.logo1),
+            contentDescription = "logo",
+            modifier = Modifier
+                .clip(CircleShape)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -213,7 +216,7 @@ fun LoadingScreen() {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    MaterialTheme {
-        LoadingScreen()
+       Proyecto_Movil_parcialTheme {
+            LoadingScreen()
+        }
     }
-}

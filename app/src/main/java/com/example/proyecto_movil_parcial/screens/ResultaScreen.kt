@@ -17,6 +17,7 @@ import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.QuickExerciseResponse
 import com.example.proyecto_movil_parcial.services.OpenAIServiceProvider
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -69,7 +70,7 @@ fun ResultaScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFD3BCA0)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
@@ -123,7 +124,7 @@ fun ResultaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCEA3D9)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 shape = RoundedCornerShape(28.dp),
                 enabled = !isProcessing
             ) {
@@ -148,13 +149,16 @@ fun ResultaScreen(
 @Preview(showBackground = true)
 @Composable
 fun ResultaScreenCorrectaPreview() {
-    val sampleExercise = QuickExerciseResponse("Definition here", "", "", emptyList())
-    val json = Gson().toJson(sampleExercise)
-    ResultaScreen(
-        palabra = "Ephemeral",
-        esCorrecta = true,
-        exerciseJson = json,
-        onAddToDictionary = {},
-        onBackToHome = {}
-    )
+    Proyecto_Movil_parcialTheme {
+        val sampleExercise = QuickExerciseResponse("Definition here", "", "", emptyList())
+        val json = Gson().toJson(sampleExercise)
+        ResultaScreen(
+            palabra = "Ephemeral",
+            esCorrecta = true,
+            exerciseJson = json,
+            onAddToDictionary = {},
+            onBackToHome = {}
+        )
+    }
+
 }

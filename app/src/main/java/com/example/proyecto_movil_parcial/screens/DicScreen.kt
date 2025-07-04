@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.FirebaseWordServiceProvider
 import com.example.proyecto_movil_parcial.services.PalabraAgregada
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -79,8 +80,12 @@ fun DicScreen() {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                     Text(
                         text = "Cargando palabras...",
                         fontSize = 16.sp,
@@ -100,11 +105,7 @@ fun DicScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(32.dp)
                 ) {
-                    Text(
-                        text = "📚",
-                        fontSize = 48.sp,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+
                     Text(
                         text = "No tienes palabras guardadas",
                         fontSize = 18.sp,
@@ -194,7 +195,7 @@ fun PalabraItemSimple(
             .clickable { onClick() },  // Permite responder a clics sobre la tarjeta completa.
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Sombra sutil.
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface // Color de fondo según tema Material 3.
+            containerColor = MaterialTheme.colorScheme.secondary
         )
     ) {
         // Distribuye contenido en fila: palabra + acciones.
@@ -269,8 +270,8 @@ private fun formatearFecha(timestamp: com.google.firebase.Timestamp): String {
 )
 @Composable
 fun DiccionarioPreview() {
-    MaterialTheme {
-        // Composable principal del diccionario, envuelto en tema Material3 para visualización consistente.
+    Proyecto_Movil_parcialTheme {
         DicScreen()
+
     }
 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.proyecto_movil_parcial.components.HearderInicio
 import com.example.proyecto_movil_parcial.services.OracionDesResult
+import com.example.proyecto_movil_parcial.ui.theme.Proyecto_Movil_parcialTheme
 import com.google.gson.Gson
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -99,10 +100,10 @@ private fun ResultSection(title: String, content: String) {
 @Preview
 @Composable
 private fun DesResultadosScreenPreview() {
-    MaterialTheme {
-        DesResultadosScreen(
-            resultJson = null,
-            onFinish = {}
-        )
+    Proyecto_Movil_parcialTheme {
+            DesResultadosScreen(
+                resultJson = null,
+                onFinish = {}
+            )
     }
 }

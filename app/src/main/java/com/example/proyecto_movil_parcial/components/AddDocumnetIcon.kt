@@ -2,6 +2,7 @@ package com.example.proyecto_movil_parcial.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -14,7 +15,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AddDocumentIcon(
     modifier: Modifier = Modifier,
-    color: Color = Color(0xFF8B7355)
+    color: Color =  MaterialTheme.colorScheme.secondary
 ) {
     Canvas(modifier = modifier) {
         val canvasWidth = size.width
